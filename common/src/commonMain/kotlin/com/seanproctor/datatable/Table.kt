@@ -1,30 +1,41 @@
+/*
+ * Copyright 2019 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package com.seanproctor.datatable
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Divider
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.*
 import kotlin.math.max
 import kotlin.math.roundToInt
 
 /**
  * Layout model that arranges its children into rows and columns.
- *
- * Example usage:
- *
- * @sample androidx.ui.layout.samples.SimpleTable
- *
- * @sample androidx.ui.layout.samples.TableWithDifferentColumnWidths
  */
 @Composable
 fun Table(
@@ -66,7 +77,8 @@ fun Table(
             tableDecorationsUnderlay.forEach { decorationsScope.it() }
         }
         var rowIndex = 0
-        tableHeader?.let { rowFunction ->
+        @Composable
+        fun addRow(height: Dp, textStyle: TextStyle, rowFunction: TableRowScope.() -> Unit) {
             with(TableRowScopeImpl(rowIndex)) {
                 rowFunction()
                 cells.forEachIndexed { columnIndex, cellFunction ->
@@ -75,11 +87,11 @@ fun Table(
                         Box(
                             Modifier.tableCell()
                                 .padding(horizontal = 16.dp)
-                                .heightIn(min = 56.dp),
+                                .heightIn(min = height),
                             contentAlignment = alignment(columnIndex)
                         ) {
                             CompositionLocalProvider(
-                                LocalTextStyle provides MaterialTheme.typography.subtitle2
+                                LocalTextStyle provides textStyle
                             ) {
                                 cellScope.cellFunction()
                             }
@@ -89,34 +101,18 @@ fun Table(
             }
             rowIndex++
         }
+        tableHeader?.let { rowFunction ->
+            addRow(56.dp, MaterialTheme.typography.subtitle2, rowFunction)
+        }
         tableChildren.forEach { rowFunction ->
-            with(TableRowScopeImpl(rowIndex)) {
-                rowFunction()
-                cells.forEachIndexed { columnIndex, cellFunction ->
-                    with(TableCellScopeImpl(rowIndex, columnIndex)) {
-                        val cellScope = this
-                        Box(
-                            modifier = Modifier.tableCell()
-                                .padding(horizontal = 16.dp)
-                                .heightIn(min = 52.dp),
-                            contentAlignment = alignment(columnIndex)
-                        ) {
-                            CompositionLocalProvider(
-                                LocalTextStyle provides MaterialTheme.typography.body2
-                            ) {
-                                cellScope.cellFunction()
-                            }
-                        }
-                    }
-                }
-            }
-            rowIndex++
+            addRow(52.dp, MaterialTheme.typography.body2, rowFunction)
         }
         if (decorationsScope != null) {
             tableDecorationsOverlay.forEach { decorationsScope.it() }
         }
     }
     }
+    val layoutDirection = LocalLayoutDirection.current
     Layout(
         tableChildren,
         modifier,
@@ -127,6 +123,7 @@ fun Table(
         println("Rows: $rows")
         fun measurableAt(row: Int, column: Int) = rowMeasurables[row]?.getOrNull(column)
         val placeables = Array(rows) { arrayOfNulls<Placeable>(columns) }
+
         // Compute column widths and collect flex information.
         var totalFlex = 0f
         println("Max width: ${constraints.maxWidth}")
@@ -156,8 +153,12 @@ fun Table(
             totalFlex += spec.flexValue
         }
         val availableSpace =
-            if (constraints.maxWidth == Constraints.Infinity) constraints.maxWidth else max(constraints.minWidth, minTableWidth)
+            if (constraints.maxWidth == Constraints.Infinity) constraints.maxWidth else max(
+                constraints.minWidth,
+                minTableWidth
+            )
         val remainingSpace = availableSpace - neededColumnWidth
+
         // Grow flexible columns to fill available horizontal space.
         println("total flex: $totalFlex, available space: $availableSpace")
         if (totalFlex > 0 && remainingSpace > 0) {
@@ -168,6 +169,7 @@ fun Table(
                 }
             }
         }
+
         // Measure the remaining children and calculate row heights.
         val rowHeights = Array(rows) { 0 }
         for (row in 0 until rows) {
@@ -200,17 +202,26 @@ fun Table(
         if (!horizontalOffsets.contentEquals(columnOffsets)) {
             horizontalOffsets = columnOffsets
         }
+
         // TODO(calintat): Do something when these do not satisfy constraints.
-        val tableSize =
-            constraints.constrain(IntSize(columnOffsets[columns], rowOffsets[rows]))
+        val tableSize = constraints.constrain(IntSize(columnOffsets[columns], rowOffsets[rows]))
+
         layout(tableSize.width, tableSize.height) {
             for (row in 0 until rows) {
                 for (column in 0 until columns) {
                     placeables[row][column]?.let {
-                        println("Placing at: ${columnOffsets[column]}, ${rowOffsets[row]}")
+                        val position = alignment(column).align(
+                            IntSize(it.width, it.height),
+                            IntSize(
+                                width = columnWidths[column],
+                                height = rowHeights[row]
+                            ),
+                            layoutDirection
+                        )
+                        println("Placing at: ${columnOffsets[column]} + ${position.x}, ${rowOffsets[row]} + ${position.y}")
                         it.place(
-                            x = columnOffsets[column],
-                            y = rowOffsets[row]
+                            x = columnOffsets[column] + position.x,
+                            y = rowOffsets[row] + position.y
                         )
                     }
                 }
