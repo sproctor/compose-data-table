@@ -24,12 +24,10 @@ import androidx.compose.material.Divider
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.*
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -39,59 +37,47 @@ import kotlin.math.roundToInt
  */
 @Composable
 fun Table(
-    columns: Int,
+    columns: List<TableColumnDefinition>,
     modifier: Modifier = Modifier,
-    alignment: (columnIndex: Int) -> Alignment = { Alignment.CenterStart },
-    columnWidth: (columnIndex: Int) -> TableColumnWidth = { TableColumnWidth.Flex(1f) },
+    separator: @Composable (rowIndex: Int) -> Unit = { Divider(Modifier.height(1.dp)) },
     content: TableScope.() -> Unit
 ) {
-    var verticalOffsets by remember { mutableStateOf(emptyArray<Int>()) }
-    var horizontalOffsets by remember { mutableStateOf(emptyArray<Int>()) }
 
-    // NOTE(lmr): It is required that we read from verticalOffsets/horizontalOffsets so that the
-    // entire Table composable gets recomposed every time they change. This used to work before
-    // without us explicitly reading them here because of a compiler bug, but now that the bug is
-    // fixed, this is needed. This type of pattern where we are observing the composition of the
-    // children of table implicitly and building up a list of composables is a bit error prone
-    // and will likely break again in the future when we move to multithreaded composition. I
-    // suggest we reevaluate the architecture of this composable.
-    @Suppress("UNUSED_EXPRESSION")
-    verticalOffsets
-    @Suppress("UNUSED_EXPRESSION")
-    horizontalOffsets
-
-    val tableChildren: @Composable () -> Unit = with(TableScopeImpl()) {
+    val tableContent: @Composable () -> Unit = with(TableScopeImpl()) {
         apply(content); @Composable {
-        val needDecorations = tableDecorationsUnderlay.isNotEmpty() ||
-                tableDecorationsOverlay.isNotEmpty()
-        val hasOffsets = verticalOffsets.isNotEmpty() && horizontalOffsets.isNotEmpty()
-        val decorationsScope = if (needDecorations && hasOffsets) {
-            TableDecorationScopeImpl(
-                verticalOffsets = verticalOffsets.toList(),
-                horizontalOffsets = horizontalOffsets.toList()
-            )
-        } else {
-            null
+
+        columns.forEachIndexed { columnIndex, columnDefinition ->
+            with(TableCellScopeImpl(0, columnIndex)) {
+                val cellScope = this
+                Box(
+                    Modifier.tableCell()
+                        .padding(horizontal = 16.dp)
+                        .heightIn(min = 56.dp),
+                    contentAlignment = columnDefinition.alignment
+                ) {
+                    CompositionLocalProvider(
+                        LocalTextStyle provides MaterialTheme.typography.subtitle2
+                    ) {
+                        cellScope.(columnDefinition.header)()
+                    }
+                }
+            }
         }
-        if (decorationsScope != null) {
-            tableDecorationsUnderlay.forEach { decorationsScope.it() }
-        }
-        var rowIndex = 0
-        @Composable
-        fun addRow(height: Dp, textStyle: TextStyle, rowFunction: TableRowScope.() -> Unit) {
-            with(TableRowScopeImpl(rowIndex)) {
+
+        tableRows.forEachIndexed { rowIndex, rowFunction ->
+            with(TableRowScopeImpl(rowIndex + 1)) {
                 rowFunction()
                 cells.forEachIndexed { columnIndex, cellFunction ->
-                    with(TableCellScopeImpl(rowIndex, columnIndex)) {
+                    with(TableCellScopeImpl(rowIndex + 1, columnIndex)) {
                         val cellScope = this
                         Box(
                             Modifier.tableCell()
                                 .padding(horizontal = 16.dp)
-                                .heightIn(min = height),
-                            contentAlignment = alignment(columnIndex)
+                                .heightIn(min = 52.dp),
+                            contentAlignment = columns[columnIndex].alignment
                         ) {
                             CompositionLocalProvider(
-                                LocalTextStyle provides textStyle
+                                LocalTextStyle provides MaterialTheme.typography.body2
                             ) {
                                 cellScope.cellFunction()
                             }
@@ -99,40 +85,37 @@ fun Table(
                     }
                 }
             }
-            rowIndex++
-        }
-        tableHeader?.let { rowFunction ->
-            addRow(56.dp, MaterialTheme.typography.subtitle2, rowFunction)
-        }
-        tableChildren.forEach { rowFunction ->
-            addRow(52.dp, MaterialTheme.typography.body2, rowFunction)
-        }
-        if (decorationsScope != null) {
-            tableDecorationsOverlay.forEach { decorationsScope.it() }
         }
     }
     }
+
+    val separators = @Composable {
+        for (column in columns.indices) {
+            separator(column)
+        }
+    }
+
     val layoutDirection = LocalLayoutDirection.current
+    val columnCount = columns.size
     Layout(
-        tableChildren,
+        listOf(tableContent, separators),
         modifier,
-    ) { measurables, constraints ->
-        println("Measurables: ${measurables.size}")
-        val rowMeasurables = measurables.filter { it.rowIndex != null }.groupBy { it.rowIndex }
-        val rows = rowMeasurables.size
-        println("Rows: $rows")
+    ) { (contentMeasurables, separatorMeasurables), constraints ->
+        val rowMeasurables = contentMeasurables.groupBy { it.rowIndex }
+        val rowCount = rowMeasurables.size
+        println("Rows: $rowCount")
         fun measurableAt(row: Int, column: Int) = rowMeasurables[row]?.getOrNull(column)
-        val placeables = Array(rows) { arrayOfNulls<Placeable>(columns) }
+        val placeables = Array(rowCount) { arrayOfNulls<Placeable>(columnCount) }
 
         // Compute column widths and collect flex information.
         var totalFlex = 0f
         println("Max width: ${constraints.maxWidth}")
-        val columnWidths = Array(columns) { 0 }
+        val columnWidths = Array(columnCount) { 0 }
         var minTableWidth = 0
         var neededColumnWidth = 0
-        for (column in 0 until columns) {
-            val spec = columnWidth(column)
-            val cells = List(rows) { row ->
+        for (column in 0 until columnCount) {
+            val spec = columns[column].width
+            val cells = List(rowCount) { row ->
                 TableMeasurable(
                     preferredWidth = {
                         placeables[row][column]?.width
@@ -162,8 +145,8 @@ fun Table(
         // Grow flexible columns to fill available horizontal space.
         println("total flex: $totalFlex, available space: $availableSpace")
         if (totalFlex > 0 && remainingSpace > 0) {
-            for (column in 0 until columns) {
-                val spec = columnWidth(column)
+            for (column in 0 until columnCount) {
+                val spec = columns[column].width
                 if (spec.flexValue > 0) {
                     columnWidths[column] += (remainingSpace * (spec.flexValue / totalFlex)).roundToInt()
                 }
@@ -171,9 +154,9 @@ fun Table(
         }
 
         // Measure the remaining children and calculate row heights.
-        val rowHeights = Array(rows) { 0 }
-        for (row in 0 until rows) {
-            for (column in 0 until columns) {
+        val rowHeights = Array(rowCount) { 0 }
+        for (row in 0 until rowCount) {
+            for (column in 0 until columnCount) {
                 if (placeables[row][column] == null) {
                     placeables[row][column] = measurableAt(row, column)?.measure(
                         Constraints(minWidth = 0, maxWidth = columnWidths[column])
@@ -183,34 +166,37 @@ fun Table(
                     max(rowHeights[row], placeables[row][column]?.height ?: 0)
             }
         }
+
+        val columnOffsets = Array(columnCount + 1) { 0 }
+        for (column in 0 until columnCount) {
+            columnOffsets[column + 1] = columnOffsets[column] + columnWidths[column]
+        }
+
+        val separatorPlaceables = separatorMeasurables.mapIndexed { index, measurable ->
+            val separatorPlaceable = measurable.measure(constraints.copy(maxWidth = columnOffsets[columnCount]))
+            rowHeights[index] += separatorPlaceable.height
+            separatorPlaceable
+        }
+
         println("Column widths: ${columnWidths.toList()}")
         println("Row heights: ${rowHeights.toList()}")
 
         // Compute row/column offsets.
-        val rowOffsets = Array(rows + 1) { 0 }
-        val columnOffsets = Array(columns + 1) { 0 }
-        for (row in 0 until rows) {
+        val rowOffsets = Array(rowCount + 1) { 0 }
+
+        for (row in 0 until rowCount) {
             rowOffsets[row + 1] = rowOffsets[row] + rowHeights[row]
         }
-        for (column in 0 until columns) {
-            columnOffsets[column + 1] = columnOffsets[column] + columnWidths[column]
-        }
         println("Column offsets: ${columnOffsets.toList()}")
-        if (!verticalOffsets.contentEquals(rowOffsets)) {
-            verticalOffsets = rowOffsets
-        }
-        if (!horizontalOffsets.contentEquals(columnOffsets)) {
-            horizontalOffsets = columnOffsets
-        }
 
         // TODO(calintat): Do something when these do not satisfy constraints.
-        val tableSize = constraints.constrain(IntSize(columnOffsets[columns], rowOffsets[rows]))
+        val tableSize = constraints.constrain(IntSize(columnOffsets[columnCount], rowOffsets[rowCount]))
 
         layout(tableSize.width, tableSize.height) {
-            for (row in 0 until rows) {
-                for (column in 0 until columns) {
+            for (row in 0 until rowCount) {
+                for (column in 0 until columnCount) {
                     placeables[row][column]?.let {
-                        val position = alignment(column).align(
+                        val position = columns[column].alignment.align(
                             IntSize(it.width, it.height),
                             IntSize(
                                 width = columnWidths[column],
@@ -225,11 +211,7 @@ fun Table(
                         )
                     }
                 }
-            }
-            val decorationConstraints =
-                Constraints.fixed(tableSize.width, tableSize.height)
-            measurables.filter { it.rowIndex == null }.forEach {
-                it.measure(decorationConstraints).place(0, 0)
+                separatorPlaceables[row].place(x = 0, y = rowOffsets[row])
             }
         }
     }

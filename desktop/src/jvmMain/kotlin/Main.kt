@@ -1,34 +1,29 @@
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Text
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.seanproctor.datatable.Table
+import com.seanproctor.datatable.TableColumnDefinition
 
 
 fun main() = application {
     Window(onCloseRequest = ::exitApplication) {
         Row {
             Table(
-//            modifier = Modifier.fillMaxSize(),
-                alignment = {
-                    if (it == 2) Alignment.BottomEnd else Alignment.CenterStart
-                },
-                columns = 3,
-            ) {
-                headerRow {
-                    cell {
+                columns = listOf(
+                    TableColumnDefinition {
                         Text("Column1")
-                    }
-                    cell {
+                    },
+                    TableColumnDefinition {
                         Text("Column2")
-                    }
-                    cell {
+                    },
+                    TableColumnDefinition(Alignment.CenterEnd) {
                         Text("Column3")
-                    }
-                }
+                    },
+                )
+//            modifier = Modifier.fillMaxSize(),
+            ) {
                 row {
                     cell {
                         Text("One")
@@ -37,7 +32,7 @@ fun main() = application {
                         Text("Two")
                     }
                     cell {
-                        Text("Three")
+                        Text("3.0")
                     }
                 }
                 row {
@@ -48,7 +43,7 @@ fun main() = application {
                         Text("Five")
                     }
                     cell {
-                        Text("Six")
+                        Text("6.0")
                     }
                 }
             }
