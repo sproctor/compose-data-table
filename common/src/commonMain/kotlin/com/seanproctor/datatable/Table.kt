@@ -183,14 +183,13 @@ fun Table(
 
         // Compute row/column offsets.
         val rowOffsets = Array(rowCount + 1) { 0 }
-
         for (row in 0 until rowCount) {
             rowOffsets[row + 1] = rowOffsets[row] + rowHeights[row]
         }
-        println("Column offsets: ${columnOffsets.toList()}")
 
         // TODO(calintat): Do something when these do not satisfy constraints.
         val tableSize = constraints.constrain(IntSize(columnOffsets[columnCount], rowOffsets[rowCount]))
+        println("Table size: ${columnOffsets[columnCount]}, ${rowOffsets[rowCount]}")
 
         layout(tableSize.width, tableSize.height) {
             for (row in 0 until rowCount) {
@@ -211,7 +210,10 @@ fun Table(
                         )
                     }
                 }
-                separatorPlaceables[row].place(x = 0, y = rowOffsets[row])
+                println("Placing a separator at: ${rowOffsets[row]}")
+                separatorPlaceables[row].let {
+                    it.place(x = 0, y = rowOffsets[row] + rowHeights[row] - it.height)
+                }
             }
         }
     }
