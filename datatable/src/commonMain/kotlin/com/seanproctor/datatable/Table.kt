@@ -16,6 +16,13 @@
 
 package com.seanproctor.datatable
 
+import androidx.compose.foundation.LocalIndication
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.foundation.indication
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
@@ -23,12 +30,20 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Divider
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.*
+import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.IntSize
+import androidx.compose.ui.unit.constrain
+import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -40,6 +55,7 @@ fun Table(
     columns: List<TableColumnDefinition>,
     modifier: Modifier = Modifier,
     separator: @Composable (rowIndex: Int) -> Unit = { Divider(Modifier.height(1.dp)) },
+    onRowClick: ((rowIndex: Int) -> Unit)? = null,
     content: TableScope.() -> Unit
 ) {
 
@@ -97,9 +113,49 @@ fun Table(
 
     val layoutDirection = LocalLayoutDirection.current
     val columnCount = columns.size
+    var currentRowOffsets = emptyArray<Int>()
+    val interactionSource = remember { MutableInteractionSource() }
+    val scope = rememberCoroutineScope()
+    fun getRowByOffset(offset: Float): Int {
+        var row = 0
+        currentRowOffsets.forEachIndexed { index, rowOffset ->
+            if (rowOffset > offset) {
+                return@forEachIndexed
+            } else {
+                row = index
+            }
+        }
+        return row
+    }
     Layout(
         listOf(tableContent, separators),
-        modifier,
+        modifier
+            .indication(interactionSource, LocalIndication.current)
+            .pointerInput(Unit) {
+            if (onRowClick != null) {
+                awaitEachGesture {
+                    val down = awaitFirstDown().also { it.consume() }
+
+                    val press = PressInteraction.Press(down.position)
+                    scope.launch {
+                        interactionSource.emit(press)
+                    }
+
+                    val up = waitForUpOrCancellation()
+                    if (up != null) {
+                        up.consume()
+                        val row = getRowByOffset(down.position.y)
+                        if (row == getRowByOffset(up.position.y)) {
+                            onRowClick(row)
+                        }
+                    }
+
+                    scope.launch {
+                        interactionSource.emit(PressInteraction.Release(press))
+                    }
+                }
+            }
+        },
     ) { (contentMeasurables, separatorMeasurables), constraints ->
         val rowMeasurables = contentMeasurables.groupBy { it.rowIndex }
         val rowCount = rowMeasurables.size
@@ -130,7 +186,12 @@ fun Table(
                     }
                 )
             }
-            minTableWidth += spec.minIntrinsicWidth(cells, constraints.maxWidth, this, constraints.maxHeight)
+            minTableWidth += spec.minIntrinsicWidth(
+                cells,
+                constraints.maxWidth,
+                this,
+                constraints.maxHeight
+            )
             columnWidths[column] = spec.preferredWidth(cells, constraints.maxWidth, this)
             neededColumnWidth += columnWidths[column]
             totalFlex += spec.flexValue
@@ -173,7 +234,8 @@ fun Table(
         }
 
         val separatorPlaceables = separatorMeasurables.mapIndexed { index, measurable ->
-            val separatorPlaceable = measurable.measure(constraints.copy(maxWidth = columnOffsets[columnCount]))
+            val separatorPlaceable =
+                measurable.measure(constraints.copy(maxWidth = columnOffsets[columnCount]))
             rowHeights[index] += separatorPlaceable.height
             separatorPlaceable
         }
@@ -186,9 +248,11 @@ fun Table(
         for (row in 0 until rowCount) {
             rowOffsets[row + 1] = rowOffsets[row] + rowHeights[row]
         }
+        currentRowOffsets = rowOffsets
 
         // TODO(calintat): Do something when these do not satisfy constraints.
-        val tableSize = constraints.constrain(IntSize(columnOffsets[columnCount], rowOffsets[rowCount]))
+        val tableSize =
+            constraints.constrain(IntSize(columnOffsets[columnCount], rowOffsets[rowCount]))
         println("Table size: ${columnOffsets[columnCount]}, ${rowOffsets[rowCount]}")
 
         layout(tableSize.width, tableSize.height) {

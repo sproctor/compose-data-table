@@ -21,7 +21,10 @@ fun main() = application {
                     TableColumnDefinition(Alignment.CenterEnd) {
                         Text("Column3")
                     },
-                )
+                ),
+                onRowClick = {
+                    println("Row clicked: $it")
+                }
 //            modifier = Modifier.fillMaxSize(),
             ) {
                 row {
