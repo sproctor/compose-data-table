@@ -1,9 +1,6 @@
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
 import com.vanniktech.maven.publish.SonatypeHost
 
-group = "com.seanproctor"
-version = "0.1"
-
 plugins {
     kotlin("multiplatform") apply false
     kotlin("android") apply false
