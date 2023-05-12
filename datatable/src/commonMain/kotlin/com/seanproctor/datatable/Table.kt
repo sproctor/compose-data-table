@@ -132,30 +132,30 @@ fun Table(
         modifier
             .indication(interactionSource, LocalIndication.current)
             .pointerInput(Unit) {
-            if (onRowClick != null) {
-                awaitEachGesture {
-                    val down = awaitFirstDown().also { it.consume() }
+                if (onRowClick != null) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown().also { it.consume() }
 
-                    val press = PressInteraction.Press(down.position)
-                    scope.launch {
-                        interactionSource.emit(press)
-                    }
+                        val press = PressInteraction.Press(down.position)
+                        scope.launch {
+                            interactionSource.emit(press)
+                        }
 
-                    val up = waitForUpOrCancellation()
-                    if (up != null) {
-                        up.consume()
-                        val row = getRowByOffset(down.position.y)
-                        if (row == getRowByOffset(up.position.y)) {
-                            onRowClick(row)
+                        val up = waitForUpOrCancellation()
+                        if (up != null) {
+                            up.consume()
+                            val row = getRowByOffset(down.position.y)
+                            if (row == getRowByOffset(up.position.y)) {
+                                onRowClick(row)
+                            }
+                        }
+
+                        scope.launch {
+                            interactionSource.emit(PressInteraction.Release(press))
                         }
                     }
-
-                    scope.launch {
-                        interactionSource.emit(PressInteraction.Release(press))
-                    }
                 }
-            }
-        },
+            },
     ) { (contentMeasurables, separatorMeasurables), constraints ->
         val rowMeasurables = contentMeasurables.groupBy { it.rowIndex }
         val rowCount = rowMeasurables.size
