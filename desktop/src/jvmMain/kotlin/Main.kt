@@ -22,12 +22,12 @@ fun main() = application {
                         Text("Column3")
                     },
                 ),
-                onRowClick = {
-                    println("Row clicked: $it")
-                }
 //            modifier = Modifier.fillMaxSize(),
             ) {
                 row {
+                    onClick = {
+                        println("First row clicked")
+                    }
                     cell {
                         Text("One")
                     }
@@ -39,6 +39,9 @@ fun main() = application {
                     }
                 }
                 row {
+                    onClick = {
+                        println("Second row clicked")
+                    }
                     cell {
                         Text("Four")
                     }
@@ -47,6 +50,17 @@ fun main() = application {
                     }
                     cell {
                         Text("6.0")
+                    }
+                }
+                row {
+                    cell {
+                        Text("Seven")
+                    }
+                    cell {
+                        Text("Eight")
+                    }
+                    cell {
+                        Text("9.0")
                     }
                 }
             }

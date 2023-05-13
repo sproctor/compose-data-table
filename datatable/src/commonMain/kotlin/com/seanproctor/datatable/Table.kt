@@ -16,26 +16,14 @@
 
 package com.seanproctor.datatable
 
-import androidx.compose.foundation.LocalIndication
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
-import androidx.compose.foundation.indication
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.PressInteraction
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Divider
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -43,7 +31,6 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.constrain
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -55,9 +42,9 @@ fun Table(
     columns: List<TableColumnDefinition>,
     modifier: Modifier = Modifier,
     separator: @Composable (rowIndex: Int) -> Unit = { Divider(Modifier.height(1.dp)) },
-    onRowClick: ((rowIndex: Int) -> Unit)? = null,
     content: TableScope.() -> Unit
 ) {
+    val tableRowScopes = mutableListOf<TableRowScope>()
 
     val tableContent: @Composable () -> Unit = with(TableScopeImpl()) {
         apply(content); @Composable {
@@ -82,6 +69,7 @@ fun Table(
 
         tableRows.forEachIndexed { rowIndex, rowFunction ->
             with(TableRowScopeImpl(rowIndex + 1)) {
+                tableRowScopes.add(this)
                 rowFunction()
                 cells.forEachIndexed { columnIndex, cellFunction ->
                     with(TableCellScopeImpl(rowIndex + 1, columnIndex)) {
@@ -89,6 +77,7 @@ fun Table(
                         Box(
                             Modifier.tableCell()
                                 .padding(horizontal = 16.dp)
+//                                .fillMaxWidth()
                                 .heightIn(min = 52.dp),
                             contentAlignment = columns[columnIndex].alignment
                         ) {
@@ -106,57 +95,27 @@ fun Table(
     }
 
     val separators = @Composable {
-        for (column in columns.indices) {
-            separator(column)
+        val rows = tableRowScopes.size + 1 // table rows + header
+        for (row in 0 until rows) {
+            separator(row)
+        }
+    }
+
+    val rowBackgrounds = @Composable {
+        tableRowScopes.forEach {
+            Box(modifier
+                .fillMaxSize()
+                .then( if (it.onClick != null) Modifier.clickable { it.onClick?.invoke() } else Modifier)
+            )
         }
     }
 
     val layoutDirection = LocalLayoutDirection.current
     val columnCount = columns.size
-    var currentRowOffsets = emptyArray<Int>()
-    val interactionSource = remember { MutableInteractionSource() }
-    val scope = rememberCoroutineScope()
-    fun getRowByOffset(offset: Float): Int {
-        var row = 0
-        currentRowOffsets.forEachIndexed { index, rowOffset ->
-            if (rowOffset > offset) {
-                return@forEachIndexed
-            } else {
-                row = index
-            }
-        }
-        return row
-    }
     Layout(
-        listOf(tableContent, separators),
+        listOf(tableContent, separators, rowBackgrounds),
         modifier
-            .indication(interactionSource, LocalIndication.current)
-            .pointerInput(Unit) {
-                if (onRowClick != null) {
-                    awaitEachGesture {
-                        val down = awaitFirstDown().also { it.consume() }
-
-                        val press = PressInteraction.Press(down.position)
-                        scope.launch {
-                            interactionSource.emit(press)
-                        }
-
-                        val up = waitForUpOrCancellation()
-                        if (up != null) {
-                            up.consume()
-                            val row = getRowByOffset(down.position.y)
-                            if (row == getRowByOffset(up.position.y)) {
-                                onRowClick(row)
-                            }
-                        }
-
-                        scope.launch {
-                            interactionSource.emit(PressInteraction.Release(press))
-                        }
-                    }
-                }
-            },
-    ) { (contentMeasurables, separatorMeasurables), constraints ->
+    ) { (contentMeasurables, separatorMeasurables, rowBackgroundMeasurables), constraints ->
         val rowMeasurables = contentMeasurables.groupBy { it.rowIndex }
         val rowCount = rowMeasurables.size
         println("Rows: $rowCount")
@@ -248,15 +207,24 @@ fun Table(
         for (row in 0 until rowCount) {
             rowOffsets[row + 1] = rowOffsets[row] + rowHeights[row]
         }
-        currentRowOffsets = rowOffsets
 
         // TODO(calintat): Do something when these do not satisfy constraints.
         val tableSize =
             constraints.constrain(IntSize(columnOffsets[columnCount], rowOffsets[rowCount]))
         println("Table size: ${columnOffsets[columnCount]}, ${rowOffsets[rowCount]}")
 
+        val rowBackgroundPlaceables = rowBackgroundMeasurables.mapIndexed { index, measurable ->
+            measurable.measure(constraints.copy(maxWidth = tableSize.width, maxHeight = rowHeights[index + 1]))
+        }
         layout(tableSize.width, tableSize.height) {
+            // Place backgrounds
+            rowBackgroundPlaceables.forEachIndexed { index, placeable ->
+                val rowIndex = index + 1 // header doesn't have a background
+                placeable.place(x = 0, y = rowOffsets[rowIndex])
+            }
+
             for (row in 0 until rowCount) {
+                // Place cells
                 for (column in 0 until columnCount) {
                     placeables[row][column]?.let {
                         val position = columns[column].alignment.align(
@@ -274,6 +242,8 @@ fun Table(
                         )
                     }
                 }
+
+                // Place separators
                 println("Placing a separator at: ${rowOffsets[row]}")
                 separatorPlaceables[row].let {
                     it.place(x = 0, y = rowOffsets[row] + rowHeights[row] - it.height)

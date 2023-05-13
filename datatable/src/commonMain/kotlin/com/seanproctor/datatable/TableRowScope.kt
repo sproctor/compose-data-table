@@ -23,11 +23,14 @@ import androidx.compose.runtime.Composable
 interface TableRowScope {
     val rowIndex: Int
 
+    var onClick: (() -> Unit)?
     fun cell(content: @Composable TableCellScope.() -> Unit)
 }
 
 internal data class TableRowScopeImpl(override val rowIndex: Int) : TableRowScope {
     val cells = mutableListOf<@Composable TableCellScope.() -> Unit>()
+
+    override var onClick: (() -> Unit)? = null
 
     override fun cell(content: @Composable TableCellScope.() -> Unit) {
         cells += content
