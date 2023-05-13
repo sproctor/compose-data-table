@@ -41,7 +41,7 @@ import kotlin.math.roundToInt
 fun Table(
     columns: List<TableColumnDefinition>,
     modifier: Modifier = Modifier,
-    separator: @Composable (rowIndex: Int) -> Unit = { Divider(Modifier.height(1.dp)) },
+    separator: @Composable (rowIndex: Int) -> Unit = { Divider() },
     content: TableScope.() -> Unit
 ) {
     val tableRowScopes = mutableListOf<TableRowScope>()
@@ -182,8 +182,9 @@ fun Table(
                         Constraints(minWidth = 0, maxWidth = columnWidths[column])
                     )
                 }
-                rowHeights[row] =
-                    max(rowHeights[row], placeables[row][column]?.height ?: 0)
+                val cellHeight = placeables[row][column]?.height ?: 0
+                println("Cell height: $cellHeight")
+                rowHeights[row] = max(rowHeights[row], cellHeight)
             }
         }
 
@@ -194,7 +195,8 @@ fun Table(
 
         val separatorPlaceables = separatorMeasurables.mapIndexed { index, measurable ->
             val separatorPlaceable =
-                measurable.measure(constraints.copy(maxWidth = columnOffsets[columnCount]))
+                measurable.measure(Constraints(minWidth = 0, maxWidth = columnOffsets[columnCount]))
+            println("separator height: ${separatorPlaceable.height}")
             rowHeights[index] += separatorPlaceable.height
             separatorPlaceable
         }
@@ -214,7 +216,9 @@ fun Table(
         println("Table size: ${columnOffsets[columnCount]}, ${rowOffsets[rowCount]}")
 
         val rowBackgroundPlaceables = rowBackgroundMeasurables.mapIndexed { index, measurable ->
-            measurable.measure(constraints.copy(maxWidth = tableSize.width, maxHeight = rowHeights[index + 1]))
+            measurable.measure(
+                Constraints(minWidth = 0, maxWidth = tableSize.width, minHeight = 0, maxHeight = rowHeights[index + 1])
+            )
         }
         layout(tableSize.width, tableSize.height) {
             // Place backgrounds

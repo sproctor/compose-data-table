@@ -1,6 +1,8 @@
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material.Text
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.seanproctor.datatable.Table
@@ -22,7 +24,7 @@ fun main() = application {
                         Text("Column3")
                     },
                 ),
-//            modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxSize(),
             ) {
                 row {
                     onClick = {
@@ -64,7 +66,7 @@ fun main() = application {
                     }
                 }
             }
-            Text("after table")
+//            Text("after table")
         }
     }
 }
