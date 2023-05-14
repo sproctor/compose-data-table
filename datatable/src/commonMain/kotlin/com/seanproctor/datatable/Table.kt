@@ -192,10 +192,10 @@ fun Table(
         for (column in 0 until columnCount) {
             columnOffsets[column + 1] = columnOffsets[column] + columnWidths[column]
         }
+        val tableWidth = max(constraints.minWidth, columnOffsets[columnCount])
 
         val separatorPlaceables = separatorMeasurables.mapIndexed { index, measurable ->
-            val separatorPlaceable =
-                measurable.measure(Constraints(minWidth = 0, maxWidth = columnOffsets[columnCount]))
+            val separatorPlaceable = measurable.measure(Constraints(minWidth = 0, maxWidth = tableWidth))
             println("separator height: ${separatorPlaceable.height}")
             rowHeights[index] += separatorPlaceable.height
             separatorPlaceable
@@ -209,11 +209,11 @@ fun Table(
         for (row in 0 until rowCount) {
             rowOffsets[row + 1] = rowOffsets[row] + rowHeights[row]
         }
+        val tableHeight = max(constraints.minHeight, rowOffsets[rowCount])
 
         // TODO(calintat): Do something when these do not satisfy constraints.
-        val tableSize =
-            constraints.constrain(IntSize(columnOffsets[columnCount], rowOffsets[rowCount]))
-        println("Table size: ${columnOffsets[columnCount]}, ${rowOffsets[rowCount]}")
+        val tableSize = constraints.constrain(IntSize(tableWidth, tableHeight))
+        println("Table size: $tableWidth, $tableHeight")
 
         val rowBackgroundPlaceables = rowBackgroundMeasurables.mapIndexed { index, measurable ->
             measurable.measure(

@@ -1,5 +1,5 @@
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.material.Text
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -11,7 +11,7 @@ import com.seanproctor.datatable.TableColumnDefinition
 
 fun main() = application {
     Window(onCloseRequest = ::exitApplication) {
-        Row {
+        Column {
             Table(
                 columns = listOf(
                     TableColumnDefinition {
@@ -24,7 +24,7 @@ fun main() = application {
                         Text("Column3")
                     },
                 ),
-                modifier = Modifier.fillMaxSize(),
+                modifier = Modifier.fillMaxWidth().weight(1f),
             ) {
                 row {
                     onClick = {
@@ -66,7 +66,7 @@ fun main() = application {
                     }
                 }
             }
-//            Text("after table")
+            Text("after table")
         }
     }
 }
