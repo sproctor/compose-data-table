@@ -217,7 +217,7 @@ fun Table(
 
         val rowBackgroundPlaceables = rowBackgroundMeasurables.mapIndexed { index, measurable ->
             measurable.measure(
-                Constraints(minWidth = 0, maxWidth = tableSize.width, minHeight = 0, maxHeight = rowHeights[index + 1])
+                Constraints(minWidth = tableSize.width, maxWidth = tableSize.width, minHeight = rowHeights[index + 1], maxHeight = rowHeights[index + 1])
             )
         }
         layout(tableSize.width, tableSize.height) {
