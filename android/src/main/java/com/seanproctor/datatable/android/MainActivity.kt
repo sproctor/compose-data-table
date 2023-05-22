@@ -31,9 +31,9 @@ class MainActivity : AppCompatActivity() {
                             Text("Column3")
                         },
                     ),
-                    modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
+                    modifier = Modifier.verticalScroll(rememberScrollState()),
                 ) {
-                    for (rowIndex in 0 until 30) {
+                    for (rowIndex in 0 until 40) {
                         row {
 //                            onClick = { Log.d("datatable", "Row clicked: $rowIndex") }
                             cell {

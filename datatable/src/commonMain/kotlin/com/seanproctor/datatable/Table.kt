@@ -103,7 +103,7 @@ fun Table(
 
     val rowBackgrounds = @Composable {
         tableRowScopes.forEach {
-            Box(modifier
+            Box(Modifier
                 .fillMaxSize()
                 .then( if (it.onClick != null) Modifier.clickable { it.onClick?.invoke() } else Modifier)
             )
@@ -183,7 +183,7 @@ fun Table(
                     )
                 }
                 val cellHeight = placeables[row][column]?.height ?: 0
-                println("Cell height: $cellHeight")
+//                println("Cell height: $cellHeight")
                 rowHeights[row] = max(rowHeights[row], cellHeight)
             }
         }
@@ -196,7 +196,7 @@ fun Table(
 
         val separatorPlaceables = separatorMeasurables.mapIndexed { index, measurable ->
             val separatorPlaceable = measurable.measure(Constraints(minWidth = 0, maxWidth = tableWidth))
-            println("separator height: ${separatorPlaceable.height}")
+//            println("separator height: ${separatorPlaceable.height}")
             rowHeights[index] += separatorPlaceable.height
             separatorPlaceable
         }
@@ -239,7 +239,7 @@ fun Table(
                             ),
                             layoutDirection
                         )
-                        println("Placing at: ${columnOffsets[column]} + ${position.x}, ${rowOffsets[row]} + ${position.y}")
+//                        println("Placing at: ${columnOffsets[column]} + ${position.x}, ${rowOffsets[row]} + ${position.y}")
                         it.place(
                             x = columnOffsets[column] + position.x,
                             y = rowOffsets[row] + position.y
@@ -248,7 +248,7 @@ fun Table(
                 }
 
                 // Place separators
-                println("Placing a separator at: ${rowOffsets[row]}")
+//                println("Placing a separator at: ${rowOffsets[row]}")
                 separatorPlaceables[row].let {
                     it.place(x = 0, y = rowOffsets[row] + rowHeights[row] - it.height)
                 }

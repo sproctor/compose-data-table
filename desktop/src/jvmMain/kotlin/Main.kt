@@ -1,5 +1,3 @@
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
@@ -13,62 +11,34 @@ import com.seanproctor.datatable.TableColumnDefinition
 
 fun main() = application {
     Window(onCloseRequest = ::exitApplication) {
-        Column {
-            Table(
-                columns = listOf(
-                    TableColumnDefinition {
-                        Text("Column1")
-                    },
-                    TableColumnDefinition {
-                        Text("Column2")
-                    },
-                    TableColumnDefinition(Alignment.CenterEnd) {
-                        Text("Column3")
-                    },
-                ),
-                modifier = Modifier.fillMaxWidth().weight(1f).verticalScroll(rememberScrollState()),
-            ) {
+        Table(
+            columns = listOf(
+                TableColumnDefinition {
+                    Text("Column1")
+                },
+                TableColumnDefinition {
+                    Text("Column2")
+                },
+                TableColumnDefinition(Alignment.CenterEnd) {
+                    Text("Column3")
+                },
+            ),
+            modifier = Modifier.verticalScroll(rememberScrollState()),
+        ) {
+            for (rowIndex in 0 until 10) {
                 row {
-                    onClick = {
-                        println("First row clicked")
+//                            onClick = { Log.d("datatable", "Row clicked: $rowIndex") }
+                    cell {
+                        Text((rowIndex * 3).toString())
                     }
                     cell {
-                        Text("One")
+                        Text((rowIndex * 3 + 1).toString(16))
                     }
                     cell {
-                        Text("Two")
-                    }
-                    cell {
-                        Text("3.0")
-                    }
-                }
-                row {
-                    onClick = {
-                        println("Second row clicked")
-                    }
-                    cell {
-                        Text("Four")
-                    }
-                    cell {
-                        Text("Five")
-                    }
-                    cell {
-                        Text("6.0")
-                    }
-                }
-                row {
-                    cell {
-                        Text("Seven")
-                    }
-                    cell {
-                        Text("Eight")
-                    }
-                    cell {
-                        Text("9.0")
+                        Text((rowIndex * 3.0f + 2.0f).toString())
                     }
                 }
             }
-            Text("after table")
         }
     }
 }
