@@ -18,9 +18,10 @@ kotlin {
 }
 
 android {
+    namespace = "com.seanproctor.datatable.android"
     compileSdk = 33
     defaultConfig {
-        applicationId = "com.seanproctor.datatable.demo"
+        applicationId = "com.seanproctor.datatable.android"
         minSdk = 24
         targetSdk = 33
         versionCode = 1
@@ -29,10 +30,5 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
-    }
-    buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
-        }
     }
 }

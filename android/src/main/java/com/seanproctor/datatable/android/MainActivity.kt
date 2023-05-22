@@ -1,12 +1,16 @@
-package com.seanproctor.android
+package com.seanproctor.datatable.android
 
 import android.os.Bundle
 import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import com.seanproctor.datatable.Table
 import com.seanproctor.datatable.TableColumnDefinition
 
@@ -27,31 +31,20 @@ class MainActivity : AppCompatActivity() {
                             Text("Column3")
                         },
                     ),
-                    onRowClick = { row ->
-                        Log.d("datatable", "Row clicked: $row")
-                    }
-//            modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().verticalScroll(rememberScrollState()),
                 ) {
-                    row {
-                        cell {
-                            Text("One")
-                        }
-                        cell {
-                            Text("Two")
-                        }
-                        cell {
-                            Text("3.0")
-                        }
-                    }
-                    row {
-                        cell {
-                            Text("Four")
-                        }
-                        cell {
-                            Text("Five")
-                        }
-                        cell {
-                            Text("6.0")
+                    for (rowIndex in 0 until 30) {
+                        row {
+//                            onClick = { Log.d("datatable", "Row clicked: $rowIndex") }
+                            cell {
+                                Text((rowIndex * 3).toString())
+                            }
+                            cell {
+                                Text((rowIndex * 3 + 1).toString(16))
+                            }
+                            cell {
+                                Text((rowIndex * 3.0f + 2.0f).toString())
+                            }
                         }
                     }
                 }
