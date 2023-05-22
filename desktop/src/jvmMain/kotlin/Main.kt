@@ -27,7 +27,7 @@ fun main() = application {
         ) {
             for (rowIndex in 0 until 10) {
                 row {
-//                            onClick = { Log.d("datatable", "Row clicked: $rowIndex") }
+                    onClick = { println("Row clicked: $rowIndex") }
                     cell {
                         Text((rowIndex * 3).toString())
                     }
