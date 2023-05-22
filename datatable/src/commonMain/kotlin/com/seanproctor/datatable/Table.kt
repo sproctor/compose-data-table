@@ -27,10 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.constrain
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.*
 import kotlin.math.max
 import kotlin.math.roundToInt
 
@@ -42,6 +39,8 @@ fun Table(
     columns: List<TableColumnDefinition>,
     modifier: Modifier = Modifier,
     separator: @Composable (rowIndex: Int) -> Unit = { Divider() },
+    headerHeight: Dp = 56.dp,
+    horizontalPadding: Dp = 16.dp,
     content: TableScope.() -> Unit
 ) {
     val tableRowScopes = mutableListOf<TableRowScope>()
@@ -54,8 +53,8 @@ fun Table(
                 val cellScope = this
                 Box(
                     Modifier.tableCell()
-                        .padding(horizontal = 16.dp)
-                        .heightIn(min = 56.dp),
+                        .padding(horizontal = horizontalPadding)
+                        .height(headerHeight),
                     contentAlignment = columnDefinition.alignment
                 ) {
                     CompositionLocalProvider(
@@ -71,14 +70,15 @@ fun Table(
             with(TableRowScopeImpl(rowIndex + 1)) {
                 tableRowScopes.add(this)
                 rowFunction()
+                val height = this.height
                 cells.forEachIndexed { columnIndex, cellFunction ->
                     with(TableCellScopeImpl(rowIndex + 1, columnIndex)) {
                         val cellScope = this
                         Box(
                             Modifier.tableCell()
-                                .padding(horizontal = 16.dp)
+                                .padding(horizontal = horizontalPadding)
 //                                .fillMaxWidth()
-                                .heightIn(min = 52.dp),
+                                .height(height),
                             contentAlignment = columns[columnIndex].alignment
                         ) {
                             CompositionLocalProvider(
