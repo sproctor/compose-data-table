@@ -148,7 +148,7 @@ abstract class TableColumnWidth private constructor(internal val flexValue: Floa
             availableHeight: Int
         ): Int {
             return cells.fold(0) { acc, cell ->
-                max(acc, cell.minIntrinsicWidth(availableHeight / cells.size))
+                max(acc, cell.minIntrinsicWidth(availableHeight))
             }
         }
 
@@ -159,7 +159,7 @@ abstract class TableColumnWidth private constructor(internal val flexValue: Floa
             availableHeight: Int
         ): Int {
             return cells.fold(0) { acc, cell ->
-                max(acc, cell.maxIntrinsicWidth(availableHeight / cells.size))
+                max(acc, cell.maxIntrinsicWidth(availableHeight))
             }
         }
     }
@@ -189,7 +189,7 @@ abstract class TableColumnWidth private constructor(internal val flexValue: Floa
             availableHeight: Int
         ): Int {
             return cells.fold(0) { acc, cell ->
-                max(acc, cell.minIntrinsicWidth(availableHeight / cells.size))
+                max(acc, cell.minIntrinsicWidth(availableHeight))
             }
         }
 
@@ -200,7 +200,7 @@ abstract class TableColumnWidth private constructor(internal val flexValue: Floa
             availableHeight: Int
         ): Int {
             return cells.fold(0) { acc, cell ->
-                max(acc, cell.maxIntrinsicWidth(availableHeight / cells.size))
+                max(acc, cell.maxIntrinsicWidth(availableHeight))
             }
         }
     }
@@ -230,7 +230,7 @@ abstract class TableColumnWidth private constructor(internal val flexValue: Floa
             availableHeight: Int
         ): Int {
             return cells.fold(0) { acc, cell ->
-                max(acc, cell.minIntrinsicWidth(availableHeight / cells.size))
+                max(acc, cell.minIntrinsicWidth(availableHeight))
             }
         }
 
@@ -241,7 +241,7 @@ abstract class TableColumnWidth private constructor(internal val flexValue: Floa
             availableHeight: Int
         ): Int {
             return cells.fold(0) { acc, cell ->
-                max(acc, cell.maxIntrinsicWidth(availableHeight / cells.size))
+                max(acc, cell.maxIntrinsicWidth(availableHeight))
             }
         }
     }

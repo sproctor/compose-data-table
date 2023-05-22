@@ -138,10 +138,20 @@ fun Table(
                                 ?.also { placeables[row][column] = it }?.width ?: 0
                     },
                     minIntrinsicWidth = {
-                        measurableAt(row, column)?.minIntrinsicWidth(it) ?: 0
+                        val height = if (row == 0) {
+                            headerHeight.roundToPx()
+                        } else {
+                            tableRowScopes[row - 1].height.roundToPx()
+                        }
+                        measurableAt(row, column)?.minIntrinsicWidth(height) ?: 0
                     },
                     maxIntrinsicWidth = {
-                        measurableAt(row, column)?.maxIntrinsicWidth(it) ?: 0
+                        val height = if (row == 0) {
+                            headerHeight.roundToPx()
+                        } else {
+                            tableRowScopes[row - 1].height.roundToPx()
+                        }
+                        measurableAt(row, column)?.maxIntrinsicWidth(height) ?: 0
                     }
                 )
             }
