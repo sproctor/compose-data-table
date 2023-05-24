@@ -17,7 +17,10 @@
 package com.seanproctor.datatable
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Divider
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
@@ -77,7 +80,6 @@ fun Table(
                         Box(
                             Modifier.tableCell()
                                 .padding(horizontal = horizontalPadding)
-//                                .fillMaxWidth()
                                 .height(height),
                             contentAlignment = columns[columnIndex].alignment
                         ) {
@@ -118,13 +120,11 @@ fun Table(
     ) { (contentMeasurables, separatorMeasurables, rowBackgroundMeasurables), constraints ->
         val rowMeasurables = contentMeasurables.groupBy { it.rowIndex }
         val rowCount = rowMeasurables.size
-        println("Rows: $rowCount")
         fun measurableAt(row: Int, column: Int) = rowMeasurables[row]?.getOrNull(column)
         val placeables = Array(rowCount) { arrayOfNulls<Placeable>(columnCount) }
 
         // Compute column widths and collect flex information.
         var totalFlex = 0f
-        println("Max width: ${constraints.maxWidth}")
         val columnWidths = Array(columnCount) { 0 }
         var minTableWidth = 0
         var neededColumnWidth = 0
@@ -173,7 +173,6 @@ fun Table(
         val remainingSpace = availableSpace - neededColumnWidth
 
         // Grow flexible columns to fill available horizontal space.
-        println("total flex: $totalFlex, available space: $availableSpace")
         if (totalFlex > 0 && remainingSpace > 0) {
             for (column in 0 until columnCount) {
                 val spec = columns[column].width
@@ -193,7 +192,6 @@ fun Table(
                     )
                 }
                 val cellHeight = placeables[row][column]?.height ?: 0
-//                println("Cell height: $cellHeight")
                 rowHeights[row] = max(rowHeights[row], cellHeight)
             }
         }
@@ -206,13 +204,9 @@ fun Table(
 
         val separatorPlaceables = separatorMeasurables.mapIndexed { index, measurable ->
             val separatorPlaceable = measurable.measure(Constraints(minWidth = 0, maxWidth = tableWidth))
-//            println("separator height: ${separatorPlaceable.height}")
             rowHeights[index] += separatorPlaceable.height
             separatorPlaceable
         }
-
-        println("Column widths: ${columnWidths.toList()}")
-        println("Row heights: ${rowHeights.toList()}")
 
         // Compute row/column offsets.
         val rowOffsets = Array(rowCount + 1) { 0 }
@@ -223,7 +217,6 @@ fun Table(
 
         // TODO(calintat): Do something when these do not satisfy constraints.
         val tableSize = constraints.constrain(IntSize(tableWidth, tableHeight))
-        println("Table size: $tableWidth, $tableHeight")
 
         val rowBackgroundPlaceables = rowBackgroundMeasurables.mapIndexed { index, measurable ->
             measurable.measure(
@@ -249,7 +242,6 @@ fun Table(
                             ),
                             layoutDirection
                         )
-//                        println("Placing at: ${columnOffsets[column]} + ${position.x}, ${rowOffsets[row]} + ${position.y}")
                         it.place(
                             x = columnOffsets[column] + position.x,
                             y = rowOffsets[row] + position.y
@@ -258,7 +250,6 @@ fun Table(
                 }
 
                 // Place separators
-//                println("Placing a separator at: ${rowOffsets[row]}")
                 separatorPlaceables[row].let {
                     it.place(x = 0, y = rowOffsets[row] + rowHeights[row] - it.height)
                 }
