@@ -9,22 +9,22 @@ The original code is derived from the implementation that was removed from Compo
 Add the dependency to your gradle build file:
 
 ```kotlin
-implementation("com.seanproctor:datatable:0.2.1")
+implementation("com.seanproctor:datatable:0.3.0")
 ```
 
 Draw a table
 
 ```kotlin
 var selectedRow by remember { mutableStateOf<Int?>(null) }
-Table(
+DataTable(
     columns = listOf(
-        TableColumnDefinition {
+        DataColumn {
             Text("Header A")
         },
-        TableColumnDefinition {
+        DataColumn {
             Text("Header B")
         },
-        TableColumnDefinition(Alignment.CenterEnd) {
+        DataColumn(Alignment.CenterEnd) {
             Text("Header C")
         },
     )
