@@ -9,7 +9,7 @@ The original code is derived from the implementation that was removed from Compo
 Add the dependency to your gradle build file:
 
 ```kotlin
-implementation("com.seanproctor:datatable:0.3.0")
+implementation("com.seanproctor:datatable:0.3.1")
 ```
 
 Draw a table
@@ -40,6 +40,40 @@ DataTable(
         cell { Text("Cell A2") }
         cell { Text("Cell B2") }
         cell { Text("Cell C2") }
+    }
+}
+```
+
+Draw a paginated table
+```kotlin
+PaginatedDataTable(
+    columns = listOf(
+        DataColumn {
+            Text("Column1")
+        },
+        DataColumn {
+            Text("Column2")
+        },
+        DataColumn(Alignment.CenterEnd) {
+            Text("Column3")
+        },
+    ),
+    state = rememberPaginatedDataTableState(5),
+    modifier = Modifier.verticalScroll(rememberScrollState()).fillMaxWidth(),
+) {
+    for (rowIndex in 0 until 100) {
+        row {
+            onClick = { println("Row clicked: $rowIndex") }
+            cell {
+                Text((rowIndex * 3).toString())
+            }
+            cell {
+                Text((rowIndex * 3 + 1).toString(16))
+            }
+            cell {
+                Text((rowIndex * 3.0f + 2.0f).toString())
+            }
+        }
     }
 }
 ```
