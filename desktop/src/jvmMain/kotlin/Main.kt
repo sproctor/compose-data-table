@@ -1,3 +1,4 @@
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
@@ -5,27 +6,30 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import com.seanproctor.datatable.Table
-import com.seanproctor.datatable.TableColumnDefinition
+import com.seanproctor.datatable.DataTable
+import com.seanproctor.datatable.DataColumn
+import com.seanproctor.datatable.PaginatedDataTable
+import com.seanproctor.datatable.rememberPaginatedDataTableState
 
 
 fun main() = application {
     Window(onCloseRequest = ::exitApplication) {
-        Table(
+        PaginatedDataTable(
             columns = listOf(
-                TableColumnDefinition {
+                DataColumn {
                     Text("Column1")
                 },
-                TableColumnDefinition {
+                DataColumn {
                     Text("Column2")
                 },
-                TableColumnDefinition(Alignment.CenterEnd) {
+                DataColumn(Alignment.CenterEnd) {
                     Text("Column3")
                 },
             ),
-            modifier = Modifier.verticalScroll(rememberScrollState()),
+            state = rememberPaginatedDataTableState(5),
+            modifier = Modifier.verticalScroll(rememberScrollState()).fillMaxWidth(),
         ) {
-            for (rowIndex in 0 until 10) {
+            for (rowIndex in 0 until 100) {
                 row {
                     onClick = { println("Row clicked: $rowIndex") }
                     cell {

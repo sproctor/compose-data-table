@@ -24,7 +24,7 @@ import kotlin.math.min
 import kotlin.math.roundToInt
 
 /**
- * Used to specify the size of a [Table]'s column.
+ * Used to specify the size of a [DataTable]'s column.
  */
 abstract class TableColumnWidth private constructor(internal val flexValue: Float) {
 

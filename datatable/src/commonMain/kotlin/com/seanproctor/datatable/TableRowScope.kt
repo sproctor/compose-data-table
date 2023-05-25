@@ -24,7 +24,6 @@ import androidx.compose.ui.unit.dp
 @LayoutScopeMarker
 interface TableRowScope {
     val rowIndex: Int
-    var height: Dp
 
     var onClick: (() -> Unit)?
     fun cell(content: @Composable TableCellScope.() -> Unit)
@@ -32,8 +31,6 @@ interface TableRowScope {
 
 internal data class TableRowScopeImpl(override val rowIndex: Int) : TableRowScope {
     val cells = mutableListOf<@Composable TableCellScope.() -> Unit>()
-
-    override var height: Dp = 52.dp
 
     override var onClick: (() -> Unit)? = null
 

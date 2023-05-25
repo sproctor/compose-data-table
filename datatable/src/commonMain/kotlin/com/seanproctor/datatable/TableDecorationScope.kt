@@ -17,7 +17,7 @@
 package com.seanproctor.datatable
 
 /**
- * Collects the vertical/horizontal offsets of each row/column of a [Table] that are available
+ * Collects the vertical/horizontal offsets of each row/column of a [DataTable] that are available
  * to a table decoration when its body is executed on a [TableDecorationScope] instance.
  */
 interface TableDecorationScope {

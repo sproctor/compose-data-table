@@ -17,10 +17,7 @@
 package com.seanproctor.datatable
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Divider
 import androidx.compose.material.LocalTextStyle
 import androidx.compose.material.MaterialTheme
@@ -38,17 +35,19 @@ import kotlin.math.roundToInt
  * Layout model that arranges its children into rows and columns.
  */
 @Composable
-fun Table(
-    columns: List<TableColumnDefinition>,
+fun DataTable(
+    columns: List<DataColumn>,
     modifier: Modifier = Modifier,
     separator: @Composable (rowIndex: Int) -> Unit = { Divider() },
     headerHeight: Dp = 56.dp,
+    rowHeight: Dp = 52.dp,
     horizontalPadding: Dp = 16.dp,
-    content: TableScope.() -> Unit
+    footer: (@Composable () -> Unit)? = null,
+    content: DataTableScope.() -> Unit
 ) {
     val tableRowScopes = mutableListOf<TableRowScope>()
 
-    val tableContent: @Composable () -> Unit = with(TableScopeImpl()) {
+    val tableContent: @Composable () -> Unit = with(DataTableScopeImpl()) {
         apply(content); @Composable {
 
         columns.forEachIndexed { columnIndex, columnDefinition ->
@@ -73,14 +72,13 @@ fun Table(
             with(TableRowScopeImpl(rowIndex + 1)) {
                 tableRowScopes.add(this)
                 rowFunction()
-                val height = this.height
                 cells.forEachIndexed { columnIndex, cellFunction ->
                     with(TableCellScopeImpl(rowIndex + 1, columnIndex)) {
                         val cellScope = this
                         Box(
                             Modifier.tableCell()
                                 .padding(horizontal = horizontalPadding)
-                                .height(height),
+                                .height(rowHeight),
                             contentAlignment = columns[columnIndex].alignment
                         ) {
                             CompositionLocalProvider(
@@ -115,9 +113,9 @@ fun Table(
     val layoutDirection = LocalLayoutDirection.current
     val columnCount = columns.size
     Layout(
-        listOf(tableContent, separators, rowBackgrounds),
+        listOfNotNull(tableContent, separators, rowBackgrounds, footer),
         modifier
-    ) { (contentMeasurables, separatorMeasurables, rowBackgroundMeasurables), constraints ->
+    ) { (contentMeasurables, separatorMeasurables, rowBackgroundMeasurables, footerMeasurable), constraints ->
         val rowMeasurables = contentMeasurables.groupBy { it.rowIndex }
         val rowCount = rowMeasurables.size
         fun measurableAt(row: Int, column: Int) = rowMeasurables[row]?.getOrNull(column)
@@ -141,7 +139,7 @@ fun Table(
                         val height = if (row == 0) {
                             headerHeight.roundToPx()
                         } else {
-                            tableRowScopes[row - 1].height.roundToPx()
+                            rowHeight.roundToPx()
                         }
                         measurableAt(row, column)?.minIntrinsicWidth(height) ?: 0
                     },
@@ -149,7 +147,7 @@ fun Table(
                         val height = if (row == 0) {
                             headerHeight.roundToPx()
                         } else {
-                            tableRowScopes[row - 1].height.roundToPx()
+                            rowHeight.roundToPx()
                         }
                         measurableAt(row, column)?.maxIntrinsicWidth(height) ?: 0
                     }
@@ -200,7 +198,10 @@ fun Table(
         for (column in 0 until columnCount) {
             columnOffsets[column + 1] = columnOffsets[column] + columnWidths[column]
         }
-        val tableWidth = max(constraints.minWidth, columnOffsets[columnCount])
+
+        val footerPlaceable = footerMeasurable.map { it.measure(Constraints(minWidth = max(constraints.minWidth, columnOffsets[columnCount]))) }.firstOrNull()
+
+        val tableWidth = listOf(constraints.minWidth, columnOffsets[columnCount], footerPlaceable?.width ?: 0).max()
 
         val separatorPlaceables = separatorMeasurables.mapIndexed { index, measurable ->
             val separatorPlaceable = measurable.measure(Constraints(minWidth = 0, maxWidth = tableWidth))
@@ -213,7 +214,8 @@ fun Table(
         for (row in 0 until rowCount) {
             rowOffsets[row + 1] = rowOffsets[row] + rowHeights[row]
         }
-        val tableHeight = max(constraints.minHeight, rowOffsets[rowCount])
+
+        val tableHeight = max(constraints.minHeight, rowOffsets[rowCount] + (footerPlaceable?.height ?: 0))
 
         // TODO(calintat): Do something when these do not satisfy constraints.
         val tableSize = constraints.constrain(IntSize(tableWidth, tableHeight))
@@ -254,6 +256,7 @@ fun Table(
                     it.place(x = 0, y = rowOffsets[row] + rowHeights[row] - it.height)
                 }
             }
+            footerPlaceable?.place(x = 0, y = rowOffsets[rowCount])
         }
     }
 }

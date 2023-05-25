@@ -20,22 +20,31 @@ import androidx.compose.foundation.layout.LayoutScopeMarker
 import androidx.compose.runtime.Immutable
 
 /**
- * Collects information about the children of a [Table] when
- * its body is executed with a [TableScope] as argument.
+ * Collects information about the children of a [DataTable] when
+ * its body is executed with a [DataTableScope] as argument.
  */
 @LayoutScopeMarker
 @Immutable
-interface TableScope {
+interface DataTableScope {
     /**
-     * Creates a new row in the [Table] with the specified content.
+     * Creates a new row in the [DataTable] with the specified content.
      */
     fun row(content: TableRowScope.() -> Unit)
+
+    /**
+     * Creates a new rows in the [DataTable] with the specified content.
+     */
+    fun rows(count: Int, content: TableRowScope.(Int) -> Unit)
 }
 
-internal class TableScopeImpl : TableScope {
+internal class DataTableScopeImpl : DataTableScope {
     val tableRows = mutableListOf<TableRowScope.() -> Unit>()
 
     override fun row(content: TableRowScope.() -> Unit) {
         tableRows += content
+    }
+
+    override fun rows(count: Int, content: TableRowScope.(Int) -> Unit) {
+        TODO("Not yet implemented")
     }
 }
