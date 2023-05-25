@@ -116,7 +116,7 @@ class PaginatedDataTableState(
 
     companion object {
         val Saver: Saver<PaginatedDataTableState, *> = listSaver(
-            save = { listOf(it.pageIndex, it.pageSize) },
+            save = { listOf(it.pageSize, it.pageIndex) },
             restore = {
                 PaginatedDataTableState(it[0], it[1])
             }
