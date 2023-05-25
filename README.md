@@ -54,24 +54,23 @@ PaginatedDataTable(
         DataColumn {
             Text("Column2")
         },
-        DataColumn(Alignment.CenterEnd) {
+        DataColumn {
             Text("Column3")
         },
     ),
     state = rememberPaginatedDataTableState(5),
-    modifier = Modifier.verticalScroll(rememberScrollState()).fillMaxWidth(),
 ) {
     for (rowIndex in 0 until 100) {
         row {
             onClick = { println("Row clicked: $rowIndex") }
             cell {
-                Text((rowIndex * 3).toString())
+                Text("Row $rowIndex, column 1")
             }
             cell {
-                Text((rowIndex * 3 + 1).toString(16))
+                Text("Row $rowIndex, column 2")
             }
             cell {
-                Text((rowIndex * 3.0f + 2.0f).toString())
+                Text("Row $rowIndex, column 3")
             }
         }
     }
