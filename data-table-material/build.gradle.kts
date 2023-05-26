@@ -50,7 +50,7 @@ kotlin {
 }
 
 android {
-    namespace = "com.seanproctor.datatable"
+    namespace = "com.seanproctor.datatable.material"
     compileSdk = 33
     defaultConfig {
         minSdk = 24

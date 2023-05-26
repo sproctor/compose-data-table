@@ -17,12 +17,9 @@ fun BasicPaginatedDataTable(
     rowHeight: Dp = 52.dp,
     horizontalPadding: Dp = 16.dp,
     state: PaginatedDataTableState = rememberPaginatedDataTableState(10),
-    footer: (@Composable () -> Unit)? = null,
+    footer: @Composable () -> Unit = { },
     content: DataTableScope.() -> Unit
 ) {
-    val start = state.pageIndex * state.pageSize
-    var count by remember { mutableStateOf(0) }
-
     BasicDataTable(
         columns = columns,
         modifier = modifier,
@@ -32,12 +29,13 @@ fun BasicPaginatedDataTable(
         horizontalPadding = horizontalPadding,
         footer = footer
     ) {
+        val start = state.pageIndex * state.pageSize
         val scope = PaginatedRowScope(start, start + state.pageSize, this)
         with(scope) {
             content()
         }
-        if (count != scope.index) {
-            count = scope.index
+        if (state.count != scope.index) {
+            state.count = scope.index
         }
     }
 }

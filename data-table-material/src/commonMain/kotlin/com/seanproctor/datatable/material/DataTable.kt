@@ -35,7 +35,7 @@ fun DataTable(
     headerHeight: Dp = 56.dp,
     rowHeight: Dp = 52.dp,
     horizontalPadding: Dp = 16.dp,
-    footer: (@Composable () -> Unit)? = null,
+    footer: @Composable () -> Unit = { },
     content: DataTableScope.() -> Unit
 ) {
     BasicDataTable(

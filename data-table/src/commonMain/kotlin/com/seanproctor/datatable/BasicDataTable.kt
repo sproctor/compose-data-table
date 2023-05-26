@@ -41,7 +41,7 @@ fun BasicDataTable(
     headerHeight: Dp = 56.dp,
     rowHeight: Dp = 52.dp,
     horizontalPadding: Dp = 16.dp,
-    footer: (@Composable () -> Unit)? = null,
+    footer: @Composable () -> Unit = { },
     cellContentProvider: CellContentProvider = DefaultCellContentProvider,
     content: DataTableScope.() -> Unit
 ) {
@@ -109,7 +109,7 @@ fun BasicDataTable(
     val layoutDirection = LocalLayoutDirection.current
     val columnCount = columns.size
     Layout(
-        listOfNotNull(tableContent, separators, rowBackgrounds, footer),
+        listOf(tableContent, separators, rowBackgrounds, footer),
         modifier
     ) { (contentMeasurables, separatorMeasurables, rowBackgroundMeasurables, footerMeasurable), constraints ->
         val rowMeasurables = contentMeasurables.groupBy { it.rowIndex }

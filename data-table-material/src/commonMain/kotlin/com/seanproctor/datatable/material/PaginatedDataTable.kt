@@ -1,6 +1,10 @@
 package com.seanproctor.datatable.material
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
@@ -10,7 +14,7 @@ import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.FirstPage
 import androidx.compose.material.icons.filled.LastPage
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
@@ -32,24 +36,23 @@ fun PaginatedDataTable(
     state: PaginatedDataTableState = rememberPaginatedDataTableState(10),
     content: DataTableScope.() -> Unit,
 ) {
-    val start = state.pageIndex * state.pageSize
-    val end = start + state.pageSize - 1
-    var count by remember { mutableStateOf(0) }
-
     BasicPaginatedDataTable(
         columns = columns,
         modifier = modifier,
         separator = separator,
         headerHeight = headerHeight,
         horizontalPadding = horizontalPadding,
+        state = state,
         footer = {
             Row(
                 modifier = Modifier.height(rowHeight).padding(horizontal = 16.dp).fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(16.dp, alignment = Alignment.End),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                val pageCount = (count + state.pageSize - 1) / state.pageSize
-                Text("${start + 1}-${end + 1} of $count")
+                val start = state.pageIndex * state.pageSize
+                val end = start + state.pageSize - 1
+                val pageCount = (state.count + state.pageSize - 1) / state.pageSize
+                Text("${start + 1}-${end + 1} of ${state.count}")
                 IconButton(
                     onClick = { state.pageIndex = 0 },
                     enabled = state.pageIndex > 0,
