@@ -1,6 +1,5 @@
-package com.seanproctor.datatable
+package com.seanproctor.datatable.material
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -12,14 +11,15 @@ import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.FirstPage
 import androidx.compose.material.icons.filled.LastPage
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.Saver
-import androidx.compose.runtime.saveable.listSaver
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.seanproctor.datatable.DataColumn
+import com.seanproctor.datatable.DataTableScope
+import com.seanproctor.datatable.paging.BasicPaginatedDataTable
+import com.seanproctor.datatable.paging.PaginatedDataTableState
+import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
 
 @Composable
 fun PaginatedDataTable(
@@ -30,13 +30,13 @@ fun PaginatedDataTable(
     rowHeight: Dp = 52.dp,
     horizontalPadding: Dp = 16.dp,
     state: PaginatedDataTableState = rememberPaginatedDataTableState(10),
-    content: DataTableScope.() -> Unit
+    content: DataTableScope.() -> Unit,
 ) {
     val start = state.pageIndex * state.pageSize
     val end = start + state.pageSize - 1
     var count by remember { mutableStateOf(0) }
 
-    DataTable(
+    BasicPaginatedDataTable(
         columns = columns,
         modifier = modifier,
         separator = separator,
@@ -75,61 +75,7 @@ fun PaginatedDataTable(
                     Icon(Icons.Default.LastPage, "Last")
                 }
             }
-        }
-    ) {
-        val scope = PaginatedRowScope(start, start + state.pageSize, this)
-        with(scope) {
-            content()
-        }
-        if (count != scope.index) {
-            count = scope.index
-            println("setting count: $count")
-        }
-    }
-}
-
-private class PaginatedRowScope(
-    private val from: Int,
-    private val to: Int,
-    private val parentScope: DataTableScope,
-) : DataTableScope {
-    var index: Int = 0
-
-    override fun row(content: TableRowScope.() -> Unit) {
-        if (index in from .. to) {
-            parentScope.row(content)
-        }
-        index++
-    }
-
-    override fun rows(count: Int, content: TableRowScope.(Int) -> Unit) {
-        TODO("Not yet implemented")
-    }
-}
-
-class PaginatedDataTableState(
-    pageSize: Int,
-    pageIndex: Int,
-) {
-    var pageSize by mutableStateOf(pageSize)
-    var pageIndex by mutableStateOf(pageIndex)
-
-    companion object {
-        val Saver: Saver<PaginatedDataTableState, *> = listSaver(
-            save = { listOf(it.pageSize, it.pageIndex) },
-            restore = {
-                PaginatedDataTableState(it[0], it[1])
-            }
-        )
-    }
-}
-
-@Composable
-fun rememberPaginatedDataTableState(
-    initialPageSize: Int,
-    initialPageIndex: Int = 0,
-): PaginatedDataTableState {
-    return rememberSaveable(saver = PaginatedDataTableState.Saver) {
-        PaginatedDataTableState(initialPageSize, initialPageIndex)
-    }
+        },
+        content = content
+    )
 }

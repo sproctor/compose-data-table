@@ -17,7 +17,7 @@ kotlin {
     sourceSets {
         val jvmMain by getting {
             dependencies {
-                implementation(project(":data-table"))
+                implementation(project(":data-table-material"))
                 implementation(compose.desktop.currentOs)
             }
         }

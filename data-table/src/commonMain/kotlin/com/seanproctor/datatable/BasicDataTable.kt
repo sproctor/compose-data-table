@@ -17,12 +17,11 @@
 package com.seanproctor.datatable
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.Divider
-import androidx.compose.material.LocalTextStyle
-import androidx.compose.material.MaterialTheme
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
@@ -35,14 +34,15 @@ import kotlin.math.roundToInt
  * Layout model that arranges its children into rows and columns.
  */
 @Composable
-fun DataTable(
+fun BasicDataTable(
     columns: List<DataColumn>,
     modifier: Modifier = Modifier,
-    separator: @Composable (rowIndex: Int) -> Unit = { Divider() },
+    separator: @Composable (rowIndex: Int) -> Unit = { },
     headerHeight: Dp = 56.dp,
     rowHeight: Dp = 52.dp,
     horizontalPadding: Dp = 16.dp,
     footer: (@Composable () -> Unit)? = null,
+    cellContentProvider: CellContentProvider = DefaultCellContentProvider,
     content: DataTableScope.() -> Unit
 ) {
     val tableRowScopes = mutableListOf<TableRowScope>()
@@ -59,9 +59,7 @@ fun DataTable(
                         .height(headerHeight),
                     contentAlignment = columnDefinition.alignment
                 ) {
-                    CompositionLocalProvider(
-                        LocalTextStyle provides MaterialTheme.typography.subtitle2
-                    ) {
+                    cellContentProvider.HeaderCellContent {
                         cellScope.(columnDefinition.header)()
                     }
                 }
@@ -81,9 +79,7 @@ fun DataTable(
                                 .height(rowHeight),
                             contentAlignment = columns[columnIndex].alignment
                         ) {
-                            CompositionLocalProvider(
-                                LocalTextStyle provides MaterialTheme.typography.body2
-                            ) {
+                            cellContentProvider.RowCellContent {
                                 cellScope.cellFunction()
                             }
                         }
@@ -105,7 +101,7 @@ fun DataTable(
         tableRowScopes.forEach {
             Box(Modifier
                 .fillMaxSize()
-                .then( if (it.onClick != null) Modifier.clickable { it.onClick?.invoke() } else Modifier)
+                .then(if (it.onClick != null) Modifier.clickable { it.onClick?.invoke() } else Modifier)
             )
         }
     }
@@ -199,7 +195,16 @@ fun DataTable(
             columnOffsets[column + 1] = columnOffsets[column] + columnWidths[column]
         }
 
-        val footerPlaceable = footerMeasurable.map { it.measure(Constraints(minWidth = max(constraints.minWidth, columnOffsets[columnCount]))) }.firstOrNull()
+        val footerPlaceable = footerMeasurable.map {
+            it.measure(
+                Constraints(
+                    minWidth = max(
+                        constraints.minWidth,
+                        columnOffsets[columnCount]
+                    )
+                )
+            )
+        }.firstOrNull()
 
         val tableWidth = listOf(constraints.minWidth, columnOffsets[columnCount], footerPlaceable?.width ?: 0).max()
 
@@ -222,7 +227,12 @@ fun DataTable(
 
         val rowBackgroundPlaceables = rowBackgroundMeasurables.mapIndexed { index, measurable ->
             measurable.measure(
-                Constraints(minWidth = tableSize.width, maxWidth = tableSize.width, minHeight = rowHeights[index + 1], maxHeight = rowHeights[index + 1])
+                Constraints(
+                    minWidth = tableSize.width,
+                    maxWidth = tableSize.width,
+                    minHeight = rowHeights[index + 1],
+                    maxHeight = rowHeights[index + 1]
+                )
             )
         }
         layout(tableSize.width, tableSize.height) {

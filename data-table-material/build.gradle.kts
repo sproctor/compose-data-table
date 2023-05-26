@@ -22,8 +22,9 @@ kotlin {
     sourceSets {
         val commonMain by getting {
             dependencies {
-                api(compose.runtime)
-                implementation(compose.foundation)
+                api(project(":data-table"))
+                implementation(compose.material)
+                implementation(compose.materialIconsExtended)
             }
         }
         val commonTest by getting {

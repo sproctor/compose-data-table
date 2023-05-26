@@ -6,10 +6,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
-import com.seanproctor.datatable.DataTable
 import com.seanproctor.datatable.DataColumn
-import com.seanproctor.datatable.PaginatedDataTable
-import com.seanproctor.datatable.rememberPaginatedDataTableState
+import com.seanproctor.datatable.material.PaginatedDataTable
+import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
 
 
 fun main() = application {
