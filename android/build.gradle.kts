@@ -8,7 +8,7 @@ group = "com.seanproctor"
 version = "1.0-SNAPSHOT"
 
 dependencies {
-    implementation(project(":datatable"))
+    implementation(project(":data-table"))
     implementation("androidx.activity:activity-compose:1.7.1")
     implementation("androidx.appcompat:appcompat:1.6.1")
 }

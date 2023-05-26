@@ -17,7 +17,7 @@ kotlin {
     sourceSets {
         val jvmMain by getting {
             dependencies {
-                implementation(project(":datatable"))
+                implementation(project(":data-table"))
                 implementation(compose.desktop.currentOs)
             }
         }
@@ -28,10 +28,5 @@ kotlin {
 compose.desktop {
     application {
         mainClass = "MainKt"
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "compose-data-table"
-            packageVersion = "1.0.0"
-        }
     }
 }

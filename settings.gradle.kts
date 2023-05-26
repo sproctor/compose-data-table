@@ -18,4 +18,4 @@ pluginManagement {
 
 rootProject.name = "compose-data-table"
 
-include(":android", ":desktop", ":datatable")
+include(":android", ":desktop", ":data-table")
