@@ -34,6 +34,8 @@ fun PaginatedDataTable(
     rowHeight: Dp = 52.dp,
     horizontalPadding: Dp = 16.dp,
     state: PaginatedDataTableState = rememberPaginatedDataTableState(10),
+    sortColumnIndex: Int? = null,
+    sortAscending: Boolean = true,
     content: DataTableScope.() -> Unit,
 ) {
     BasicPaginatedDataTable(
@@ -79,6 +81,9 @@ fun PaginatedDataTable(
                 }
             }
         },
+        cellContentProvider = Material3CellContentProvider,
+        sortColumnIndex = sortColumnIndex,
+        sortAscending = sortAscending,
         content = content
     )
 }

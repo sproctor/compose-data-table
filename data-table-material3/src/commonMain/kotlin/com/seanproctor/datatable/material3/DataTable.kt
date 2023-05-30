@@ -36,6 +36,8 @@ fun DataTable(
     rowHeight: Dp = 52.dp,
     horizontalPadding: Dp = 16.dp,
     footer: @Composable () -> Unit = { },
+    sortColumnIndex: Int? = null,
+    sortAscending: Boolean = true,
     content: DataTableScope.() -> Unit
 ) {
     BasicDataTable(
@@ -47,6 +49,8 @@ fun DataTable(
         horizontalPadding = horizontalPadding,
         footer = footer,
         cellContentProvider = Material3CellContentProvider,
+        sortColumnIndex = sortColumnIndex,
+        sortAscending = sortAscending,
         content = content
     )
 }

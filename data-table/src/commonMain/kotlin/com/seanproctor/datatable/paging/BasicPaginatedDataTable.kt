@@ -4,9 +4,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import com.seanproctor.datatable.BasicDataTable
-import com.seanproctor.datatable.DataColumn
-import com.seanproctor.datatable.DataTableScope
+import com.seanproctor.datatable.*
 
 @Composable
 fun BasicPaginatedDataTable(
@@ -18,6 +16,9 @@ fun BasicPaginatedDataTable(
     horizontalPadding: Dp = 16.dp,
     state: PaginatedDataTableState = rememberPaginatedDataTableState(10),
     footer: @Composable () -> Unit = { },
+    cellContentProvider: CellContentProvider = DefaultCellContentProvider,
+    sortColumnIndex: Int? = null,
+    sortAscending: Boolean = true,
     content: DataTableScope.() -> Unit
 ) {
     BasicDataTable(
@@ -27,7 +28,10 @@ fun BasicPaginatedDataTable(
         headerHeight = headerHeight,
         rowHeight = rowHeight,
         horizontalPadding = horizontalPadding,
-        footer = footer
+        footer = footer,
+        cellContentProvider = cellContentProvider,
+        sortColumnIndex = sortColumnIndex,
+        sortAscending = sortAscending,
     ) {
         val start = state.pageIndex * state.pageSize
         val scope = PaginatedRowScope(start, start + state.pageSize, this)

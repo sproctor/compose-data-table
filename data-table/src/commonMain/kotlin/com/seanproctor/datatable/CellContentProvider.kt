@@ -7,7 +7,7 @@ interface CellContentProvider {
     fun RowCellContent(content: @Composable () -> Unit)
 
     @Composable
-    fun HeaderCellContent(content: @Composable () -> Unit)
+    fun HeaderCellContent(sorted: Boolean, sortAscending: Boolean, content: @Composable () -> Unit)
 }
 
 object DefaultCellContentProvider : CellContentProvider {
@@ -18,7 +18,7 @@ object DefaultCellContentProvider : CellContentProvider {
     }
 
     @Composable
-    override fun HeaderCellContent(content: @Composable () -> Unit) {
+    override fun HeaderCellContent(sorted: Boolean, sortAscending: Boolean, content: @Composable () -> Unit) {
         content()
     }
 }

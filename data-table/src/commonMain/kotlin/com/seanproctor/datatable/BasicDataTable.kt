@@ -17,10 +17,7 @@
 package com.seanproctor.datatable
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
@@ -43,6 +40,8 @@ fun BasicDataTable(
     horizontalPadding: Dp = 16.dp,
     footer: @Composable () -> Unit = { },
     cellContentProvider: CellContentProvider = DefaultCellContentProvider,
+    sortColumnIndex: Int? = null,
+    sortAscending: Boolean = true,
     content: DataTableScope.() -> Unit
 ) {
     val tableRowScopes = mutableListOf<TableRowScope>()
@@ -56,11 +55,19 @@ fun BasicDataTable(
                 Box(
                     Modifier.tableCell()
                         .padding(horizontal = horizontalPadding)
-                        .height(headerHeight),
+                        .height(headerHeight)
+                        .then(
+                            columnDefinition.onSort?.let {
+                                Modifier.clickable { it(columnIndex, !sortAscending) }
+                            } ?: Modifier
+                        ),
                     contentAlignment = columnDefinition.alignment
                 ) {
-                    cellContentProvider.HeaderCellContent {
-                        cellScope.(columnDefinition.header)()
+                    Row {
+                        println("Column index: $columnIndex, sort: $sortColumnIndex")
+                        cellContentProvider.HeaderCellContent(sorted = columnIndex == sortColumnIndex, sortAscending = sortAscending) {
+                            cellScope.(columnDefinition.header)()
+                        }
                     }
                 }
             }
