@@ -11,7 +11,7 @@ internal class PaginatedRowScope(
     var index: Int = 0
 
     override fun row(content: TableRowScope.() -> Unit) {
-        if (index in from .. to) {
+        if (index in from until to) {
             parentScope.row(content)
         }
         index++
