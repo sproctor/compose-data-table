@@ -16,7 +16,7 @@ import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
 fun App(onRowClick: (Int) -> Unit) {
     val rowData = (0 until 100).map { index ->
         DemoData(index + 1f, "Row: $index")
-    }.take(1)
+    }
     var sortColumnIndex by remember { mutableStateOf<Int?>(null) }
     var sortAscending by remember { mutableStateOf(true) }
 
