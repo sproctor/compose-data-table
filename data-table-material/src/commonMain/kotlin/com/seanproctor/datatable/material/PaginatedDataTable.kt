@@ -24,6 +24,7 @@ import com.seanproctor.datatable.DataTableScope
 import com.seanproctor.datatable.paging.BasicPaginatedDataTable
 import com.seanproctor.datatable.paging.PaginatedDataTableState
 import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
+import kotlin.math.min
 
 @Composable
 fun PaginatedDataTable(
@@ -51,10 +52,10 @@ fun PaginatedDataTable(
                 horizontalArrangement = Arrangement.spacedBy(16.dp, alignment = Alignment.End),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-                val start = state.pageIndex * state.pageSize
-                val end = start + state.pageSize - 1
+                val start = min(state.pageIndex * state.pageSize + 1, state.count)
+                val end = min(start + state.pageSize - 1, state.count)
                 val pageCount = (state.count + state.pageSize - 1) / state.pageSize
-                Text("${start + 1}-${end + 1} of ${state.count}")
+                Text("$start-$end of ${state.count}")
                 IconButton(
                     onClick = { state.pageIndex = 0 },
                     enabled = state.pageIndex > 0,
