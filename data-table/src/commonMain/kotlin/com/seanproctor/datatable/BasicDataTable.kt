@@ -19,6 +19,7 @@ package com.seanproctor.datatable
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
@@ -52,22 +53,21 @@ fun BasicDataTable(
         columns.forEachIndexed { columnIndex, columnDefinition ->
             with(TableCellScopeImpl(0, columnIndex)) {
                 val cellScope = this
-                Box(
+                Row(
                     Modifier.tableCell()
                         .padding(horizontal = horizontalPadding)
-                        .height(headerHeight)
-                        .then(
-                            columnDefinition.onSort?.let {
-                                Modifier.clickable { it(columnIndex, !sortAscending) }
-                            } ?: Modifier
-                        ),
-                    contentAlignment = columnDefinition.alignment
+                        .height(headerHeight),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Row {
-                        println("Column index: $columnIndex, sort: $sortColumnIndex")
-                        cellContentProvider.HeaderCellContent(sorted = columnIndex == sortColumnIndex, sortAscending = sortAscending) {
-                            cellScope.(columnDefinition.header)()
+                    val sorted = columnIndex == sortColumnIndex
+                    cellContentProvider.HeaderCellContent(
+                        sorted = sorted,
+                        sortAscending = sortAscending,
+                        onClick = columnDefinition.onSort?.let {
+                            { it(columnIndex, if (sorted) !sortAscending else sortAscending) }
                         }
+                    ) {
+                        cellScope.(columnDefinition.header)()
                     }
                 }
             }
@@ -80,11 +80,11 @@ fun BasicDataTable(
                 cells.forEachIndexed { columnIndex, cellFunction ->
                     with(TableCellScopeImpl(rowIndex + 1, columnIndex)) {
                         val cellScope = this
-                        Box(
+                        Row(
                             Modifier.tableCell()
                                 .padding(horizontal = horizontalPadding)
                                 .height(rowHeight),
-                            contentAlignment = columns[columnIndex].alignment
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             cellContentProvider.RowCellContent {
                                 cellScope.cellFunction()
@@ -254,16 +254,11 @@ fun BasicDataTable(
                 for (column in 0 until columnCount) {
                     placeables[row][column]?.let {
                         val position = columns[column].alignment.align(
-                            IntSize(it.width, it.height),
-                            IntSize(
-                                width = columnWidths[column],
-                                height = rowHeights[row]
-                            ),
-                            layoutDirection
+                            it.width, columnWidths[column], layoutDirection
                         )
                         it.place(
-                            x = columnOffsets[column] + position.x,
-                            y = rowOffsets[row] + position.y
+                            x = columnOffsets[column] + position,
+                            y = rowOffsets[row]
                         )
                     }
                 }
