@@ -4,6 +4,8 @@ This library is an implementation of the [Material Design data table](https://m2
 
 The original code is derived from the implementation that was removed from Compose pre-1.0. The goal is to implement the entire Material Design spec for data tables.
 
+![screenshot](screenshot.png)
+
 ## Getting started
 
 Add the dependency to your gradle build file:
