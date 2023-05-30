@@ -1,3 +1,5 @@
+![Maven Central](https://img.shields.io/maven-central/v/com.seanproctor/data-table)
+
 # Compose Data Table
 
 This library is an implementation of the [Material Design data table](https://m2.material.io/components/data-tables) for Compose.
@@ -10,8 +12,16 @@ The original code is derived from the implementation that was removed from Compo
 
 Add the dependency to your gradle build file:
 
+Material 2:
+
 ```kotlin
-implementation("com.seanproctor:datatable:0.3.1")
+implementation("com.seanproctor:data-table-material:<VERSION>")
+```
+
+Material 3:
+
+```kotlin
+implementation("com.seanproctor:data-table-material3:<VERSION>")
 ```
 
 Draw a table
