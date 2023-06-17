@@ -120,7 +120,7 @@ fun BasicDataTable(
         modifier
     ) { (contentMeasurables, separatorMeasurables, rowBackgroundMeasurables, footerMeasurable), constraints ->
         val rowMeasurables = contentMeasurables.groupBy { it.rowIndex }
-        val rowCount = rowMeasurables.size
+        val rowCount = rowMeasurables.keys.maxBy { it ?: 0 }?.plus(1) ?: 0
         fun measurableAt(row: Int, column: Int) = rowMeasurables[row]?.getOrNull(column)
         val placeables = Array(rowCount) { arrayOfNulls<Placeable>(columnCount) }
 
@@ -184,7 +184,7 @@ fun BasicDataTable(
         }
 
         // Measure the remaining children and calculate row heights.
-        val rowHeights = Array(rowCount) { 0 }
+        val rowHeights = Array(rowCount) { rowHeight.roundToPx() }
         for (row in 0 until rowCount) {
             for (column in 0 until columnCount) {
                 if (placeables[row][column] == null) {
