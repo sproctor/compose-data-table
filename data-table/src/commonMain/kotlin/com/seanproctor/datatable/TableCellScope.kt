@@ -31,5 +31,5 @@ interface TableCellScope {
 
 internal data class TableCellScopeImpl(
     override val rowIndex: Int,
-    override val columnIndex: Int
+    override val columnIndex: Int,
 ) : TableCellScope

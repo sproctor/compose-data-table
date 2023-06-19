@@ -45,9 +45,8 @@ fun BasicDataTable(
     sortAscending: Boolean = true,
     content: DataTableScope.() -> Unit
 ) {
-    val tableRowScopes = mutableListOf<TableRowScope>()
-
-    val tableContent: @Composable () -> Unit = with(DataTableScopeImpl()) {
+    val tableScope = DataTableScopeImpl()
+    val tableContent: @Composable () -> Unit = with(tableScope) {
         apply(content); @Composable {
 
         columns.forEachIndexed { columnIndex, columnDefinition ->
@@ -73,11 +72,16 @@ fun BasicDataTable(
             }
         }
 
-        tableRows.forEachIndexed { rowIndex, rowFunction ->
+        tableRows.forEachIndexed { rowIndex, rowData ->
             with(TableRowScopeImpl(rowIndex + 1)) {
-                tableRowScopes.add(this)
-                rowFunction()
-                cells.forEachIndexed { columnIndex, cellFunction ->
+                rowData.content(this)
+                if (cells.size > columns.size) {
+                    throw RuntimeException("Row ${this.rowIndex} has too many cells.")
+                }
+                if (cells.size < columns.size) {
+                    throw RuntimeException("Row ${this.rowIndex} doesn't have enough cells.")
+                }
+                cells.forEachIndexed { columnIndex, cellData ->
                     with(TableCellScopeImpl(rowIndex + 1, columnIndex)) {
                         val cellScope = this
                         Row(
@@ -87,7 +91,7 @@ fun BasicDataTable(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             cellContentProvider.RowCellContent {
-                                cellScope.cellFunction()
+                                cellData.content(cellScope)
                             }
                         }
                     }
@@ -98,17 +102,17 @@ fun BasicDataTable(
     }
 
     val separators = @Composable {
-        val rows = tableRowScopes.size + 1 // table rows + header
+        val rows = tableScope.tableRows.size + 1 // table rows + header
         for (row in 0 until rows) {
             separator(row)
         }
     }
 
     val rowBackgrounds = @Composable {
-        tableRowScopes.forEach {
+        tableScope.tableRows.forEach {
             Box(Modifier
                 .fillMaxSize()
-                .then(if (it.onClick != null) Modifier.clickable { it.onClick?.invoke() } else Modifier)
+                .then(if (it.onClick != null) Modifier.clickable { it.onClick.invoke() } else Modifier)
             )
         }
     }
@@ -120,7 +124,7 @@ fun BasicDataTable(
         modifier
     ) { (contentMeasurables, separatorMeasurables, rowBackgroundMeasurables, footerMeasurable), constraints ->
         val rowMeasurables = contentMeasurables.groupBy { it.rowIndex }
-        val rowCount = rowMeasurables.keys.maxBy { it ?: 0 }?.plus(1) ?: 0
+        val rowCount = rowMeasurables.size
         fun measurableAt(row: Int, column: Int) = rowMeasurables[row]?.getOrNull(column)
         val placeables = Array(rowCount) { arrayOfNulls<Placeable>(columnCount) }
 
@@ -184,7 +188,7 @@ fun BasicDataTable(
         }
 
         // Measure the remaining children and calculate row heights.
-        val rowHeights = Array(rowCount) { rowHeight.roundToPx() }
+        val rowHeights = Array(rowCount) { 0 }
         for (row in 0 until rowCount) {
             for (column in 0 until columnCount) {
                 if (placeables[row][column] == null) {

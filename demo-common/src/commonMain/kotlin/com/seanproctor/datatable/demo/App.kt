@@ -52,9 +52,8 @@ fun App(onRowClick: (Int) -> Unit) {
         sortAscending = sortAscending,
         modifier = Modifier.verticalScroll(rememberScrollState()).fillMaxWidth(),
     ) {
-        sortedData.forEach { data ->
-            row {
-                onClick = { onRowClick(rowIndex) }
+        sortedData.forEachIndexed { index, data ->
+            row(onClick = { onRowClick(index) }) {
                 cell {
                     Text(data.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }

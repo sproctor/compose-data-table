@@ -18,23 +18,18 @@ package com.seanproctor.datatable
 
 import androidx.compose.foundation.layout.LayoutScopeMarker
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 
 @LayoutScopeMarker
 interface TableRowScope {
     val rowIndex: Int
 
-    var onClick: (() -> Unit)?
     fun cell(content: @Composable TableCellScope.() -> Unit)
 }
 
 internal data class TableRowScopeImpl(override val rowIndex: Int) : TableRowScope {
-    val cells = mutableListOf<@Composable TableCellScope.() -> Unit>()
-
-    override var onClick: (() -> Unit)? = null
+    val cells = mutableListOf<TableCellData>()
 
     override fun cell(content: @Composable TableCellScope.() -> Unit) {
-        cells += content
+        cells += TableCellData(content)
     }
 }
