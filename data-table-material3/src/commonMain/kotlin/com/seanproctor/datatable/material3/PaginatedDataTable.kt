@@ -37,6 +37,10 @@ fun PaginatedDataTable(
     state: PaginatedDataTableState = rememberPaginatedDataTableState(10),
     sortColumnIndex: Int? = null,
     sortAscending: Boolean = true,
+    showCheckboxColumn: Boolean = false,
+    selectedRows: Set<Int> = emptySet(),
+    onSelectAll: (Boolean) -> Unit = {},
+    onRowSelected: (Int, Boolean) -> Unit = { _, _ -> },
     content: DataTableScope.() -> Unit,
 ) {
     BasicPaginatedDataTable(
@@ -85,6 +89,10 @@ fun PaginatedDataTable(
         cellContentProvider = Material3CellContentProvider,
         sortColumnIndex = sortColumnIndex,
         sortAscending = sortAscending,
+        showCheckboxColumn = showCheckboxColumn,
+        selectedRows = selectedRows,
+        onSelectAll = onSelectAll,
+        onRowSelected = onRowSelected,
         content = content
     )
 }

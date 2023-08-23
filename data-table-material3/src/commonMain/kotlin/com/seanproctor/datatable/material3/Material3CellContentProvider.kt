@@ -44,4 +44,12 @@ object Material3CellContentProvider : CellContentProvider {
             }
         }
     }
+
+    @Composable
+    override fun CheckboxCellContent(checked: Boolean, onCheckChanged: (Boolean) -> Unit) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onCheckChanged
+        )
+    }
 }

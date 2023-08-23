@@ -19,6 +19,10 @@ fun BasicPaginatedDataTable(
     cellContentProvider: CellContentProvider = DefaultCellContentProvider,
     sortColumnIndex: Int? = null,
     sortAscending: Boolean = true,
+    showCheckboxColumn: Boolean = false,
+    selectedRows: Set<Int> = emptySet(),
+    onSelectAll: (Boolean) -> Unit = {},
+    onRowSelected: (Int, Boolean) -> Unit = { _, _ -> },
     content: DataTableScope.() -> Unit
 ) {
     BasicDataTable(
@@ -32,6 +36,10 @@ fun BasicPaginatedDataTable(
         cellContentProvider = cellContentProvider,
         sortColumnIndex = sortColumnIndex,
         sortAscending = sortAscending,
+        showCheckboxColumn = showCheckboxColumn,
+        selectedRows = selectedRows,
+        onSelectAll = onSelectAll,
+        onRowSelected = onRowSelected,
     ) {
         val start = state.pageIndex * state.pageSize
         val scope = PaginatedRowScope(start, start + state.pageSize, this)

@@ -27,6 +27,8 @@ fun App(onRowClick: (Int) -> Unit) {
         else -> throw IllegalStateException("Invalid column index")
     }
 
+    var selectedRows by remember { mutableStateOf<Set<Int>>(emptySet()) }
+
     PaginatedDataTable(
         columns = listOf(
             DataColumn(
@@ -51,6 +53,18 @@ fun App(onRowClick: (Int) -> Unit) {
         sortColumnIndex = sortColumnIndex,
         sortAscending = sortAscending,
         modifier = Modifier.verticalScroll(rememberScrollState()).fillMaxWidth(),
+        showCheckboxColumn = true,
+        selectedRows = selectedRows,
+        onRowSelected = { index, selected ->
+            if (selected) {
+                selectedRows + index
+            } else {
+                selectedRows - index
+            }
+        },
+        onSelectAll = {
+            selectedRows = if (it) emptySet() else (0..rowData.size).toSet()
+        }
     ) {
         sortedData.forEachIndexed { index, data ->
             row(onClick = { onRowClick(index) }) {

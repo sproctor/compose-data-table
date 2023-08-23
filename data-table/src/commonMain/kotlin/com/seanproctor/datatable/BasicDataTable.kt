@@ -43,13 +43,33 @@ fun BasicDataTable(
     cellContentProvider: CellContentProvider = DefaultCellContentProvider,
     sortColumnIndex: Int? = null,
     sortAscending: Boolean = true,
+    showCheckboxColumn: Boolean = false,
+    selectedRows: Set<Int> = emptySet(),
+    onSelectAll: (Boolean) -> Unit = {},
+    onRowSelected: (Int, Boolean) -> Unit = { _, _ -> },
     content: DataTableScope.() -> Unit
 ) {
     val tableScope = DataTableScopeImpl()
     val tableContent: @Composable () -> Unit = with(tableScope) {
         apply(content); @Composable {
 
-        columns.forEachIndexed { columnIndex, columnDefinition ->
+        val actualColumns = if (showCheckboxColumn) {
+            listOf(
+                DataColumn(
+                    alignment = Alignment.CenterHorizontally,
+                    width = TableColumnWidth.Wrap
+                ) {
+                    val allSelected = selectedRows.size == this@with.tableRows.size
+                    cellContentProvider.CheckboxCellContent(
+                        checked = allSelected,
+                        onCheckChanged = onSelectAll
+                    )
+                }
+            ) + columns
+        } else {
+            columns
+        }
+        actualColumns.forEachIndexed { columnIndex, columnDefinition ->
             with(TableCellScopeImpl(0, columnIndex)) {
                 val cellScope = this
                 Row(
@@ -75,10 +95,10 @@ fun BasicDataTable(
         tableRows.forEachIndexed { rowIndex, rowData ->
             with(TableRowScopeImpl(rowIndex + 1)) {
                 rowData.content(this)
-                if (cells.size > columns.size) {
+                if (cells.size > actualColumns.size) {
                     throw RuntimeException("Row ${this.rowIndex} has too many cells.")
                 }
-                if (cells.size < columns.size) {
+                if (cells.size < actualColumns.size) {
                     throw RuntimeException("Row ${this.rowIndex} doesn't have enough cells.")
                 }
                 cells.forEachIndexed { columnIndex, cellData ->
@@ -118,7 +138,7 @@ fun BasicDataTable(
     }
 
     val layoutDirection = LocalLayoutDirection.current
-    val columnCount = columns.size
+    val columnCount = actual.size + if (showCheckboxColumn) 1 else 0
     Layout(
         listOf(tableContent, separators, rowBackgrounds, footer),
         modifier
@@ -217,10 +237,15 @@ fun BasicDataTable(
             )
         }.firstOrNull()
 
-        val tableWidth = listOf(constraints.minWidth, columnOffsets[columnCount], footerPlaceable?.width ?: 0).max()
+        val tableWidth = listOf(
+            constraints.minWidth,
+            columnOffsets[columnCount],
+            footerPlaceable?.width ?: 0
+        ).max()
 
         val separatorPlaceables = separatorMeasurables.mapIndexed { index, measurable ->
-            val separatorPlaceable = measurable.measure(Constraints(minWidth = 0, maxWidth = tableWidth))
+            val separatorPlaceable =
+                measurable.measure(Constraints(minWidth = 0, maxWidth = tableWidth))
             rowHeights[index] += separatorPlaceable.height
             separatorPlaceable
         }
@@ -231,7 +256,8 @@ fun BasicDataTable(
             rowOffsets[row + 1] = rowOffsets[row] + rowHeights[row]
         }
 
-        val tableHeight = max(constraints.minHeight, rowOffsets[rowCount] + (footerPlaceable?.height ?: 0))
+        val tableHeight =
+            max(constraints.minHeight, rowOffsets[rowCount] + (footerPlaceable?.height ?: 0))
 
         // TODO(calintat): Do something when these do not satisfy constraints.
         val tableSize = constraints.constrain(IntSize(tableWidth, tableHeight))
