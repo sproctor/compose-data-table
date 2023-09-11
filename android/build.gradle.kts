@@ -1,7 +1,7 @@
 plugins {
-    id("org.jetbrains.compose")
-    id("com.android.application")
-    kotlin("android")
+    alias(libs.plugins.compose)
+    alias(libs.plugins.android.application)
+    alias(libs.plugins.kotlin.android)
 }
 
 group = "com.seanproctor"
@@ -11,8 +11,7 @@ dependencies {
     implementation(project(":demo-common"))
     implementation(compose.material)
     implementation(compose.uiTooling)
-    implementation("androidx.activity:activity-compose:1.7.2")
-    implementation("androidx.appcompat:appcompat:1.6.1")
+    implementation(libs.activity.compose)
 }
 
 kotlin {
@@ -21,11 +20,11 @@ kotlin {
 
 android {
     namespace = "com.seanproctor.datatable.android"
-    compileSdk = 33
+    compileSdk = extra["sdk.compile"].toString().toInt()
     defaultConfig {
         applicationId = "com.seanproctor.datatable.android"
-        minSdk = 24
-        targetSdk = 33
+        minSdk = extra["sdk.min"].toString().toInt()
+        targetSdk = extra["sdk.compile"].toString().toInt()
         versionCode = 1
         versionName = "1.0-SNAPSHOT"
     }

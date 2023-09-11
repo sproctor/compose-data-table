@@ -1,15 +1,15 @@
 plugins {
-    kotlin("multiplatform")
-    id("org.jetbrains.compose")
-    id("com.android.library")
-    id("com.vanniktech.maven.publish.base")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.compose)
+    alias(libs.plugins.android.library)
+    alias(libs.plugins.vanniktech.base)
 }
 
 group = "com.seanproctor"
 version = extra["datatable.version"] as String
 
 kotlin {
-    android {
+    androidTarget {
         publishLibraryVariants("release")
     }
     jvm("desktop") {
@@ -38,7 +38,7 @@ kotlin {
         }
         val androidUnitTest by getting {
             dependencies {
-                implementation("junit:junit:4.13.2")
+                implementation(libs.junit)
             }
         }
         val desktopMain by getting {
@@ -51,9 +51,9 @@ kotlin {
 
 android {
     namespace = "com.seanproctor.datatable.material"
-    compileSdk = 33
+    compileSdk = extra["sdk.compile"].toString().toInt()
     defaultConfig {
-        minSdk = 24
+        minSdk = extra["sdk.min"].toString().toInt()
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

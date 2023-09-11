@@ -1,13 +1,13 @@
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 
 plugins {
-    kotlin("multiplatform")
-    id("org.jetbrains.compose")
-    id("com.android.library")
+    alias(libs.plugins.kotlin.multiplatform)
+    alias(libs.plugins.compose)
+    alias(libs.plugins.android.library)
 }
 
 kotlin {
-    android()
+    androidTarget()
     jvm("desktop") {
         jvmToolchain(11)
     }
@@ -26,9 +26,9 @@ kotlin {
 
 android {
     namespace = "com.seanproctor.datatable.demo"
-    compileSdk = 33
+    compileSdk = extra["sdk.compile"].toString().toInt()
     defaultConfig {
-        minSdk = 24
+        minSdk = extra["sdk.min"].toString().toInt()
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
