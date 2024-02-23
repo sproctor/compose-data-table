@@ -11,7 +11,7 @@ plugins {
 }
 
 tasks.wrapper {
-    gradleVersion = "8.3"
+    gradleVersion = "8.6"
 }
 
 allprojects {
@@ -28,7 +28,7 @@ allprojects {
             repositories {
                 maven {
                     name = "testMaven"
-                    url = file("${rootProject.buildDir}/testMaven").toURI()
+                    url = layout.buildDirectory.file("testMaven").get().asFile.toURI()
                 }
             }
         }

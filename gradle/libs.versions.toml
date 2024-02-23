@@ -1,11 +1,11 @@
 [versions]
 
-activityCompose = "1.7.2"
-kotlin = "1.9.10"
-androidGradlePlugin = "8.1.1"
+activityCompose = "1.8.2"
+kotlin = "1.9.22"
+androidGradlePlugin = "8.2.2"
 junit = "4.13.2"
-compose = "1.5.1"
-vanniktech = "0.25.3"
+compose = "1.5.12"
+vanniktech = "0.27.0"
 
 [libraries]
 
