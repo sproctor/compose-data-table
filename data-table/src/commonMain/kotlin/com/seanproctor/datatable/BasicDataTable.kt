@@ -16,8 +16,10 @@
 
 package com.seanproctor.datatable
 
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -35,6 +37,7 @@ import kotlin.math.roundToInt
 fun BasicDataTable(
     columns: List<DataColumn>,
     modifier: Modifier = Modifier,
+    state: ScrollState = rememberScrollState(),
     separator: @Composable (rowIndex: Int) -> Unit = { },
     headerHeight: Dp = 56.dp,
     rowHeight: Dp = 52.dp,
