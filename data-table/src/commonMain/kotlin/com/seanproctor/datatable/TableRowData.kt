@@ -1,6 +1,9 @@
 package com.seanproctor.datatable
 
-internal data class TableRowData(
-    val onClick: (() -> Unit)?,
-    val content: TableRowScope.() -> Unit,
-)
+internal class TableRowData(
+    val onClick: ((index: Int) -> Unit)?,
+    val key: ((index: Int) -> Any)?,
+    val item: TableRowScope.(index: Int) -> Unit,
+) {
+
+}

@@ -16,7 +16,10 @@
 
 package com.seanproctor.datatable
 
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.LayoutScopeMarker
+import androidx.compose.foundation.lazy.layout.IntervalList
+import androidx.compose.foundation.lazy.layout.MutableIntervalList
 import androidx.compose.runtime.Immutable
 
 /**
@@ -29,22 +32,56 @@ interface DataTableScope {
     /**
      * Creates a new row in the [BasicDataTable] with the specified content.
      */
-    fun row(onClick: (() -> Unit)? = null, content: TableRowScope.() -> Unit)
+    fun row(
+        onClick: (() -> Unit)? = null,
+        key: Any? = null,
+        content: TableRowScope.() -> Unit
+    )
 
     /**
-     * Creates a new rows in the [BasicDataTable] with the specified content.
+     * Creates new rows in the [BasicDataTable] with the specified content.
      */
-    fun rows(count: Int, content: TableRowScope.(Int) -> Unit)
+    fun rows(
+        count: Int,
+        onClick: ((index: Int) -> Unit)? = null,
+        key: ((index: Int) -> Any)? = null,
+        content: TableRowScope.(Int) -> Unit
+    )
 }
 
+@ExperimentalFoundationApi
 internal class DataTableScopeImpl : DataTableScope {
-    val tableRows = mutableListOf<TableRowData>()
+    private val _tableRows = MutableIntervalList<TableRowData>()
+    val tableRows: IntervalList<TableRowData> = _tableRows
 
-    override fun row(onClick: (() -> Unit)?, content: TableRowScope.() -> Unit) {
-        tableRows += TableRowData(onClick, content)
+    override fun row(
+        onClick: (() -> Unit)?,
+        key: Any?,
+        content: TableRowScope.() -> Unit
+    ) {
+        _tableRows.addInterval(
+            1,
+            TableRowData(
+                onClick = if (onClick != null) { _: Int -> onClick() } else null,
+                key = if (key != null) { _: Int -> key } else null,
+                item = { content() }
+            )
+        )
     }
 
-    override fun rows(count: Int, content: TableRowScope.(Int) -> Unit) {
-        TODO("Not yet implemented")
+    override fun rows(
+        count: Int,
+        onClick: ((index: Int) -> Unit)?,
+        key: ((index: Int) -> Any)?,
+        content: TableRowScope.(Int) -> Unit
+    ) {
+        _tableRows.addInterval(
+            count,
+            TableRowData(
+                onClick = onClick,
+                key = key,
+                item = content
+            )
+        )
     }
 }

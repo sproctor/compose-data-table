@@ -5,5 +5,6 @@ import androidx.compose.runtime.Composable
 internal data class TableCellData(
     val rowIndex: Int,
     val columnIndex: Int,
-    val content: @Composable () -> Unit,
+    val key: ((Int, Int) -> Any)?,
+    val content: @Composable TableCellScope.() -> Unit,
 )

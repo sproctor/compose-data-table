@@ -79,10 +79,10 @@ fun BasicDataTable(
             with(TableRowScopeImpl(rowIndex + 1)) {
                 rowData.content(this)
                 if (cells.size > columns.size) {
-                    throw RuntimeException("Row ${this.rowIndex} has too many cells.")
+                    error("Row ${this.rowIndex} has too many cells.")
                 }
                 if (cells.size < columns.size) {
-                    throw RuntimeException("Row ${this.rowIndex} doesn't have enough cells.")
+                    error("Row ${this.rowIndex} doesn't have enough cells.")
                 }
                 cells.forEachIndexed { columnIndex, cellData ->
                     with(TableCellScopeImpl(rowIndex + 1, columnIndex)) {
@@ -220,10 +220,15 @@ fun BasicDataTable(
             )
         }.firstOrNull()
 
-        val tableWidth = listOf(constraints.minWidth, columnOffsets[columnCount], footerPlaceable?.width ?: 0).max()
+        val tableWidth = listOf(
+            constraints.minWidth,
+            columnOffsets[columnCount],
+            footerPlaceable?.width ?: 0
+        ).max()
 
         val separatorPlaceables = separatorMeasurables.mapIndexed { index, measurable ->
-            val separatorPlaceable = measurable.measure(Constraints(minWidth = 0, maxWidth = tableWidth))
+            val separatorPlaceable =
+                measurable.measure(Constraints(minWidth = 0, maxWidth = tableWidth))
             rowHeights[index] += separatorPlaceable.height
             separatorPlaceable
         }
@@ -234,7 +239,8 @@ fun BasicDataTable(
             rowOffsets[row + 1] = rowOffsets[row] + rowHeights[row]
         }
 
-        val tableHeight = max(constraints.minHeight, rowOffsets[rowCount] + (footerPlaceable?.height ?: 0))
+        val tableHeight =
+            max(constraints.minHeight, rowOffsets[rowCount] + (footerPlaceable?.height ?: 0))
 
         // TODO(calintat): Do something when these do not satisfy constraints.
         val tableSize = constraints.constrain(IntSize(tableWidth, tableHeight))
