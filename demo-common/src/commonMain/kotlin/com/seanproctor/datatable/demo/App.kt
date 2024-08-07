@@ -1,6 +1,7 @@
 package com.seanproctor.datatable.demo
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
@@ -27,6 +28,7 @@ fun App(onRowClick: (Int) -> Unit) {
         else -> throw IllegalStateException("Invalid column index")
     }
 
+    LazyColumn {  }
     PaginatedDataTable(
         columns = listOf(
             DataColumn(
@@ -47,10 +49,10 @@ fun App(onRowClick: (Int) -> Unit) {
                 Text("Column2")
             },
         ),
-        state = rememberPaginatedDataTableState(5),
+        state = rememberPaginatedDataTableState(15),
         sortColumnIndex = sortColumnIndex,
         sortAscending = sortAscending,
-        modifier = Modifier.verticalScroll(rememberScrollState()).fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth(),
     ) {
         sortedData.forEachIndexed { index, data ->
             row(onClick = { onRowClick(index) }) {

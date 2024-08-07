@@ -7,6 +7,19 @@ pluginManagement {
     }
 }
 
+plugins {
+    // See https://jmfayard.github.io/refreshVersions
+    id("de.fayard.refreshVersions") version "0.60.5"
+}
+
 rootProject.name = "compose-data-table"
 
 include(":android", ":desktop", ":demo-common", ":data-table", ":data-table-material", ":data-table-material3")
+
+refreshVersions {
+    file("build/tmp/refreshVersions").mkdirs()
+    versionsPropertiesFile = file("build/tmp/refreshVersions/versions.properties")
+    rejectVersionIf {
+        candidate.stabilityLevel.isLessStableThan(current.stabilityLevel)
+    }
+}

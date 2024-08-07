@@ -1,6 +1,7 @@
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.compose)
+    alias(libs.plugins.compose.compiler)
     alias(libs.plugins.android.library)
     alias(libs.plugins.vanniktech.base)
 }
@@ -12,10 +13,8 @@ kotlin {
     androidTarget {
         publishLibraryVariants("release")
     }
-    jvm("desktop") {
-        jvmToolchain(11)
-    }
-    js(IR) {
+    jvm()
+    js {
         browser()
     }
 
@@ -40,12 +39,14 @@ kotlin {
                 implementation(libs.junit)
             }
         }
-        val desktopMain by getting {
+        val jvmMain by getting {
             dependencies {
                 api(compose.preview)
             }
         }
     }
+
+    jvmToolchain(11)
 }
 
 android {

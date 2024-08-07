@@ -3,15 +3,14 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 plugins {
     alias(libs.plugins.kotlin.multiplatform)
     alias(libs.plugins.compose)
+    alias(libs.plugins.compose.compiler)
     alias(libs.plugins.android.library)
 }
 
 kotlin {
     androidTarget()
-    jvm("desktop") {
-        jvmToolchain(11)
-    }
-    js(IR) {
+    jvm()
+    js {
         browser()
     }
     sourceSets {
@@ -22,6 +21,8 @@ kotlin {
             }
         }
     }
+
+    jvmToolchain(11)
 }
 
 android {

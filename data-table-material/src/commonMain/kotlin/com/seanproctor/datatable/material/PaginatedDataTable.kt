@@ -1,19 +1,15 @@
 package com.seanproctor.datatable.material
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.IconButton
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.LastPage
 import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.FirstPage
-import androidx.compose.material.icons.filled.LastPage
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -78,7 +74,7 @@ fun PaginatedDataTable(
                     onClick = { state.pageIndex = pageCount - 1 },
                     enabled = state.pageIndex < pageCount - 1
                 ) {
-                    Icon(Icons.Default.LastPage, "Last")
+                    Icon(Icons.AutoMirrored.Filled.LastPage, "Last")
                 }
             }
         },
