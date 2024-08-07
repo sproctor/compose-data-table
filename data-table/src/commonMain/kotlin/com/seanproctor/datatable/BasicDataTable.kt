@@ -17,6 +17,8 @@
 package com.seanproctor.datatable
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -35,6 +37,7 @@ import kotlin.math.roundToInt
 fun BasicDataTable(
     columns: List<DataColumn>,
     modifier: Modifier = Modifier,
+    state: DataTableState = rememberDataTableState(),
     separator: @Composable (rowIndex: Int) -> Unit = { },
     headerHeight: Dp = 56.dp,
     rowHeight: Dp = 52.dp,
@@ -75,12 +78,8 @@ fun BasicDataTable(
         tableRows.forEachIndexed { rowIndex, rowData ->
             with(TableRowScopeImpl(rowIndex + 1)) {
                 rowData.content(this)
-                if (cells.size > columns.size) {
-                    throw RuntimeException("Row ${this.rowIndex} has too many cells.")
-                }
-                if (cells.size < columns.size) {
-                    throw RuntimeException("Row ${this.rowIndex} doesn't have enough cells.")
-                }
+                check(cells.size <= columns.size) { "Row ${this.rowIndex} has too many cells." }
+                check(cells.size >= columns.size) { "Row ${this.rowIndex} doesn't have enough cells." }
                 cells.forEachIndexed { columnIndex, cellData ->
                     with(TableCellScopeImpl(rowIndex + 1, columnIndex)) {
                         val cellScope = this
@@ -122,7 +121,14 @@ fun BasicDataTable(
     Layout(
         listOf(tableContent, separators, rowBackgrounds, footer),
         modifier
+            .then(state.awaitLayoutModifier)
+            .scrollable(
+                state = state,
+                orientation = Orientation.Vertical,
+                interactionSource = state.internalInteractionSource,
+            )
     ) { (contentMeasurables, separatorMeasurables, rowBackgroundMeasurables, footerMeasurable), constraints ->
+        state.viewportHeight = constraints.maxHeight
         val rowMeasurables = contentMeasurables.groupBy { it.rowIndex }
         val rowCount = rowMeasurables.size
         fun measurableAt(row: Int, column: Int) = rowMeasurables[row]?.getOrNull(column)
@@ -231,7 +237,9 @@ fun BasicDataTable(
             rowOffsets[row + 1] = rowOffsets[row] + rowHeights[row]
         }
 
-        val tableHeight = max(constraints.minHeight, rowOffsets[rowCount] + (footerPlaceable?.height ?: 0))
+        val totalHeight = rowOffsets[rowCount] + (footerPlaceable?.height ?: 0)
+        state.totalHeight = totalHeight
+        val tableHeight = max(constraints.minHeight, totalHeight)
 
         // TODO(calintat): Do something when these do not satisfy constraints.
         val tableSize = constraints.constrain(IntSize(tableWidth, tableHeight))
@@ -254,25 +262,30 @@ fun BasicDataTable(
             }
 
             for (row in 0 until rowCount) {
-                // Place cells
-                for (column in 0 until columnCount) {
-                    placeables[row][column]?.let {
-                        val position = columns[column].alignment.align(
-                            it.width, columnWidths[column], layoutDirection
-                        )
-                        it.place(
-                            x = columnOffsets[column] + position,
-                            y = rowOffsets[row]
-                        )
+                val rowOffset = rowOffsets[row]
+                val y = rowOffset - state.offset
+                val height = rowHeights[row]
+                if (y > -height && y < state.viewportHeight) {
+                    // Place cells
+                    for (column in 0 until columnCount) {
+                        placeables[row][column]?.let {
+                            val position = columns[column].alignment.align(
+                                it.width, columnWidths[column], layoutDirection
+                            )
+                            it.place(
+                                x = columnOffsets[column] + position,
+                                y = y
+                            )
+                        }
+                    }
+
+                    // Place separators
+                    separatorPlaceables[row].let {
+                        it.place(x = 0, y = y + rowHeights[row] - it.height)
                     }
                 }
-
-                // Place separators
-                separatorPlaceables[row].let {
-                    it.place(x = 0, y = rowOffsets[row] + rowHeights[row] - it.height)
-                }
             }
-            footerPlaceable?.place(x = 0, y = rowOffsets[rowCount])
+            footerPlaceable?.place(x = 0, y = rowOffsets[rowCount] - state.offset)
         }
     }
 }
