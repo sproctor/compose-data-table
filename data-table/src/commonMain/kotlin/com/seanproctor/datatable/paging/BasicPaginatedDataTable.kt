@@ -2,6 +2,7 @@ package com.seanproctor.datatable.paging
 
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.seanproctor.datatable.*
@@ -14,6 +15,7 @@ fun BasicPaginatedDataTable(
     headerHeight: Dp = 56.dp,
     rowHeight: Dp = 52.dp,
     horizontalPadding: Dp = 16.dp,
+    background: Color = Color.Unspecified,
     state: PaginatedDataTableState = rememberPaginatedDataTableState(10),
     footer: @Composable () -> Unit = { },
     cellContentProvider: CellContentProvider = DefaultCellContentProvider,
@@ -28,6 +30,7 @@ fun BasicPaginatedDataTable(
         headerHeight = headerHeight,
         rowHeight = rowHeight,
         horizontalPadding = horizontalPadding,
+        background = background,
         footer = footer,
         cellContentProvider = cellContentProvider,
         sortColumnIndex = sortColumnIndex,

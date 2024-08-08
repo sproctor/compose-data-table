@@ -16,6 +16,7 @@
 
 package com.seanproctor.datatable
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
@@ -23,6 +24,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -42,6 +44,7 @@ fun BasicDataTable(
     headerHeight: Dp = 56.dp,
     rowHeight: Dp = 52.dp,
     horizontalPadding: Dp = 16.dp,
+    background: Color = Color.Unspecified,
     footer: @Composable () -> Unit = { },
     cellContentProvider: CellContentProvider = DefaultCellContentProvider,
     sortColumnIndex: Int? = null,
@@ -107,13 +110,41 @@ fun BasicDataTable(
         }
     }
 
+    val headerBackground = @Composable {
+        Box(
+            Modifier
+                .background(background)
+                .fillMaxSize()
+        )
+    }
+    val footerBackground = @Composable {
+        Box(
+            Modifier
+                .background(background)
+                .fillMaxSize()
+        )
+    }
     val rowBackgrounds = @Composable {
+        // Header background
+        Box(
+            Modifier
+                .background(background)
+                .fillMaxSize()
+        )
+        // Row backgrounds
         tableScope.tableRows.forEach {
             Box(Modifier
+                .background(background)
                 .fillMaxSize()
                 .then(if (it.onClick != null) Modifier.clickable { it.onClick.invoke() } else Modifier)
             )
         }
+        // Footer background
+        Box(
+            Modifier
+                .background(background)
+                .fillMaxSize()
+        )
     }
 
     val layoutDirection = LocalLayoutDirection.current
@@ -194,7 +225,7 @@ fun BasicDataTable(
         }
 
         // Measure the remaining children and calculate row heights.
-        val rowHeights = Array(rowCount) { 0 }
+        val rowHeights = Array(rowCount + 1) { 0 }
         for (row in 0 until rowCount) {
             for (column in 0 until columnCount) {
                 if (placeables[row][column] == null) {
@@ -212,8 +243,9 @@ fun BasicDataTable(
             columnOffsets[column + 1] = columnOffsets[column] + columnWidths[column]
         }
 
-        val footerPlaceable = footerMeasurable.map {
-            it.measure(
+        val footerPlaceable = footerMeasurable
+            .firstOrNull()
+            ?.measure(
                 Constraints(
                     minWidth = max(
                         constraints.minWidth,
@@ -221,7 +253,9 @@ fun BasicDataTable(
                     )
                 )
             )
-        }.firstOrNull()
+            ?.also {
+                rowHeights[rowCount] = it.height
+            }
 
         val tableWidth = listOf(constraints.minWidth, columnOffsets[columnCount], footerPlaceable?.width ?: 0).max()
 
@@ -249,23 +283,20 @@ fun BasicDataTable(
                 Constraints(
                     minWidth = tableSize.width,
                     maxWidth = tableSize.width,
-                    minHeight = rowHeights[index + 1],
-                    maxHeight = rowHeights[index + 1]
+                    minHeight = rowHeights[index],
+                    maxHeight = rowHeights[index]
                 )
             )
         }
-        layout(tableSize.width, tableSize.height) {
-            // Place backgrounds
-            rowBackgroundPlaceables.forEachIndexed { index, placeable ->
-                val rowIndex = index + 1 // header doesn't have a background
-                placeable.place(x = 0, y = rowOffsets[rowIndex])
-            }
 
-            for (row in 0 until rowCount) {
+        layout(tableSize.width, tableSize.height) {
+            for (row in 1 until rowCount) {
                 val rowOffset = rowOffsets[row]
                 val y = rowOffset - state.offset
                 val height = rowHeights[row]
                 if (y > -height && y < state.viewportHeight) {
+                    // Place backgrounds
+                    rowBackgroundPlaceables[row].place(x = 0, y = y)
                     // Place cells
                     for (column in 0 until columnCount) {
                         placeables[row][column]?.let {
@@ -285,7 +316,31 @@ fun BasicDataTable(
                     }
                 }
             }
-            footerPlaceable?.place(x = 0, y = rowOffsets[rowCount] - state.offset)
+
+            // Draw header
+            rowBackgroundPlaceables[0].place(x = 0, y = 0)
+            for (column in 0 until columnCount) {
+                placeables[0][column]?.let {
+                    val position = columns[column].alignment.align(
+                        it.width, columnWidths[column], layoutDirection
+                    )
+                    it.place(
+                        x = columnOffsets[column] + position,
+                        y = 0
+                    )
+                }
+            }
+
+            // Place header separator
+            separatorPlaceables[0].let {
+                it.place(x = 0, y = rowHeights[0] - it.height)
+            }
+
+            // Place footer
+            if (footerPlaceable != null) {
+                rowBackgroundPlaceables[rowCount].place(x = 0, y = state.viewportHeight - footerPlaceable.height)
+            }
+            footerPlaceable?.place(x = 0, y = state.viewportHeight - footerPlaceable.height)
         }
     }
 }

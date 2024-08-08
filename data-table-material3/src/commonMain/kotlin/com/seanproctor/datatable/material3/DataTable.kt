@@ -16,13 +16,14 @@
 
 package com.seanproctor.datatable.material3
 
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.*
-import com.seanproctor.datatable.BasicDataTable
-import com.seanproctor.datatable.DataColumn
-import com.seanproctor.datatable.DataTableScope
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.dp
+import com.seanproctor.datatable.*
 
 /**
  * Layout model that arranges its children into rows and columns.
@@ -31,10 +32,12 @@ import com.seanproctor.datatable.DataTableScope
 fun DataTable(
     columns: List<DataColumn>,
     modifier: Modifier = Modifier,
-    separator: @Composable (rowIndex: Int) -> Unit = { Divider() },
+    state: DataTableState = rememberDataTableState(),
+    separator: @Composable (rowIndex: Int) -> Unit = { HorizontalDivider() },
     headerHeight: Dp = 56.dp,
     rowHeight: Dp = 52.dp,
     horizontalPadding: Dp = 16.dp,
+    background: Color = MaterialTheme.colorScheme.surface,
     footer: @Composable () -> Unit = { },
     sortColumnIndex: Int? = null,
     sortAscending: Boolean = true,
@@ -43,10 +46,12 @@ fun DataTable(
     BasicDataTable(
         columns = columns,
         modifier = modifier,
+        state = state,
         separator = separator,
         headerHeight = headerHeight,
         rowHeight = rowHeight,
         horizontalPadding = horizontalPadding,
+        background = background,
         footer = footer,
         cellContentProvider = Material3CellContentProvider,
         sortColumnIndex = sortColumnIndex,

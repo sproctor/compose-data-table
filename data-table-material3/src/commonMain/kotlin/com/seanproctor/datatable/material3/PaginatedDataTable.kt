@@ -10,13 +10,11 @@ import androidx.compose.material.icons.filled.ChevronLeft
 import androidx.compose.material.icons.filled.ChevronRight
 import androidx.compose.material.icons.filled.FirstPage
 import androidx.compose.material.icons.filled.LastPage
-import androidx.compose.material3.Divider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.seanproctor.datatable.DataColumn
@@ -34,6 +32,7 @@ fun PaginatedDataTable(
     headerHeight: Dp = 56.dp,
     rowHeight: Dp = 52.dp,
     horizontalPadding: Dp = 16.dp,
+    background: Color = MaterialTheme.colorScheme.surface,
     state: PaginatedDataTableState = rememberPaginatedDataTableState(10),
     sortColumnIndex: Int? = null,
     sortAscending: Boolean = true,
@@ -45,6 +44,7 @@ fun PaginatedDataTable(
         separator = separator,
         headerHeight = headerHeight,
         horizontalPadding = horizontalPadding,
+        background = background,
         state = state,
         footer = {
             Row(

@@ -17,12 +17,12 @@
 package com.seanproctor.datatable.material
 
 import androidx.compose.material.Divider
+import androidx.compose.material.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.*
-import com.seanproctor.datatable.BasicDataTable
-import com.seanproctor.datatable.DataColumn
-import com.seanproctor.datatable.DataTableScope
+import com.seanproctor.datatable.*
 
 /**
  * Layout model that arranges its children into rows and columns.
@@ -31,10 +31,12 @@ import com.seanproctor.datatable.DataTableScope
 fun DataTable(
     columns: List<DataColumn>,
     modifier: Modifier = Modifier,
+    state: DataTableState = rememberDataTableState(),
     separator: @Composable (rowIndex: Int) -> Unit = { Divider() },
     headerHeight: Dp = 56.dp,
     rowHeight: Dp = 52.dp,
     horizontalPadding: Dp = 16.dp,
+    background: Color = MaterialTheme.colors.surface,
     footer: @Composable () -> Unit = { },
     sortColumnIndex: Int? = null,
     sortAscending: Boolean = true,
@@ -43,10 +45,12 @@ fun DataTable(
     BasicDataTable(
         columns = columns,
         modifier = modifier,
+        state = state,
         separator = separator,
         headerHeight = headerHeight,
         rowHeight = rowHeight,
         horizontalPadding = horizontalPadding,
+        background = background,
         footer = footer,
         cellContentProvider = MaterialCellContentProvider,
         sortColumnIndex = sortColumnIndex,
