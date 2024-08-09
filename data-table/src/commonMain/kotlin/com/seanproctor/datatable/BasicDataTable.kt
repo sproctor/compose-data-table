@@ -24,7 +24,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.platform.LocalLayoutDirection
@@ -110,20 +112,6 @@ fun BasicDataTable(
         }
     }
 
-    val headerBackground = @Composable {
-        Box(
-            Modifier
-                .background(background)
-                .fillMaxSize()
-        )
-    }
-    val footerBackground = @Composable {
-        Box(
-            Modifier
-                .background(background)
-                .fillMaxSize()
-        )
-    }
     val rowBackgrounds = @Composable {
         // Header background
         Box(
@@ -152,6 +140,7 @@ fun BasicDataTable(
     Layout(
         listOf(tableContent, separators, rowBackgrounds, footer),
         modifier
+            .clip(RectangleShape)
             .then(state.awaitLayoutModifier)
             .scrollable(
                 state = state,
