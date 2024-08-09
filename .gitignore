@@ -84,3 +84,4 @@ app/release/*
 .idea/aws.xml
 **/bin/
 **/moko-resources-generated.js
+**/.kotlin/*
