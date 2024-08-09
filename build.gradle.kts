@@ -12,7 +12,7 @@ plugins {
 }
 
 tasks.wrapper {
-    gradleVersion = "8.6"
+    gradleVersion = "8.9"
 }
 
 allprojects {
@@ -33,7 +33,6 @@ allprojects {
                 }
             }
         }
-        @Suppress("UnstableApiUsage")
         configure<MavenPublishBaseExtension> {
             publishToMavenCentral(SonatypeHost.S01)
             signAllPublications()
