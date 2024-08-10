@@ -29,22 +29,23 @@ interface DataTableScope {
     /**
      * Creates a new row in the [BasicDataTable] with the specified content.
      */
-    fun row(onClick: (() -> Unit)? = null, content: TableRowScope.() -> Unit)
-
-    /**
-     * Creates a new rows in the [BasicDataTable] with the specified content.
-     */
-    fun rows(count: Int, content: TableRowScope.(Int) -> Unit)
+    fun row(
+        onClick: (() -> Unit)? = null,
+        isHeader: Boolean = false,
+        isFooter: Boolean = false,
+        content: TableRowScope.() -> Unit
+    )
 }
 
 internal class DataTableScopeImpl : DataTableScope {
     val tableRows = mutableListOf<TableRowData>()
 
-    override fun row(onClick: (() -> Unit)?, content: TableRowScope.() -> Unit) {
-        tableRows += TableRowData(onClick, content)
-    }
-
-    override fun rows(count: Int, content: TableRowScope.(Int) -> Unit) {
-        TODO("Not yet implemented")
+    override fun row(
+        onClick: (() -> Unit)?,
+        isHeader: Boolean,
+        isFooter: Boolean,
+        content: TableRowScope.() -> Unit
+    ) {
+        tableRows += TableRowData(onClick, isHeader, isFooter, content)
     }
 }

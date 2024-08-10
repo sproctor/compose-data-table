@@ -1,12 +1,15 @@
 package com.seanproctor.datatable.demo
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import com.seanproctor.datatable.DataColumn
+import com.seanproctor.datatable.material3.DataTable
 import com.seanproctor.datatable.material3.PaginatedDataTable
 import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
 
@@ -25,7 +28,7 @@ fun App(onRowClick: (Int) -> Unit) {
         else -> throw IllegalStateException("Invalid column index")
     }
 
-    PaginatedDataTable(
+    DataTable(
         columns = listOf(
             DataColumn(
                 onSort = { index, ascending ->
@@ -45,7 +48,7 @@ fun App(onRowClick: (Int) -> Unit) {
                 Text("Column2")
             },
         ),
-        state = rememberPaginatedDataTableState(15),
+        //state = rememberPaginatedDataTableState(15),
         sortColumnIndex = sortColumnIndex,
         sortAscending = sortAscending,
         modifier = Modifier.fillMaxWidth(),
@@ -58,6 +61,14 @@ fun App(onRowClick: (Int) -> Unit) {
                 cell {
                     Text(data.value.toString())
                 }
+            }
+        }
+        row(isFooter = true) {
+            cell {
+                Text("Footer", maxLines = 1, overflow = TextOverflow.Ellipsis)
+            }
+            cell {
+                Text("Footer value")
             }
         }
     }

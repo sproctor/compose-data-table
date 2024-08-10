@@ -53,6 +53,9 @@ fun BasicDataTable(
     sortAscending: Boolean = true,
     content: DataTableScope.() -> Unit
 ) {
+    val headerIndexes = mutableListOf<Int>()
+    val footerIndexes = mutableListOf<Int>()
+
     val tableScope = DataTableScopeImpl()
     val tableContent: @Composable () -> Unit = with(tableScope) {
         apply(content); @Composable {
@@ -81,6 +84,12 @@ fun BasicDataTable(
         }
 
         tableRows.forEachIndexed { rowIndex, rowData ->
+            if (rowData.isHeader) {
+                headerIndexes.add(rowIndex)
+            }
+            if (rowData.isFooter) {
+                footerIndexes.add(rowIndex)
+            }
             with(TableRowScopeImpl(rowIndex + 1)) {
                 rowData.content(this)
                 check(cells.size <= columns.size) { "Row ${this.rowIndex} has too many cells." }
@@ -147,7 +156,7 @@ fun BasicDataTable(
                 orientation = Orientation.Vertical,
                 interactionSource = state.internalInteractionSource,
             )
-    ) { (contentMeasurables, separatorMeasurables, rowBackgroundMeasurables, footerMeasurable), constraints ->
+    ) { (contentMeasurables, separatorMeasurables, rowBackgroundMeasurables, footerMeasurables), constraints ->
         state.viewportHeight = constraints.maxHeight
         val rowMeasurables = contentMeasurables.groupBy { it.rowIndex }
         val rowCount = rowMeasurables.size
@@ -213,123 +222,114 @@ fun BasicDataTable(
             }
         }
 
+        val tableWidth = listOf(constraints.minWidth, columnWidths.sum()).max()
+
+        val columnAlignment = Array(columnCount) { columns[it].alignment }
+
         // Measure the remaining children and calculate row heights.
-        val rowHeights = Array(rowCount + 1) { 0 }
+        val measuredRows = mutableListOf<DataTableMeasuredElement>()
         for (row in 0 until rowCount) {
+            val isHeader = row == 0 || headerIndexes.contains(row - 1)
+            val isFooter = footerIndexes.contains(row - 1)
             for (column in 0 until columnCount) {
-                if (placeables[row][column] == null) {
+                val placeable = placeables[row][column]
+                if (placeable == null) {
                     placeables[row][column] = measurableAt(row, column)?.measure(
                         Constraints(minWidth = 0, maxWidth = columnWidths[column])
                     )
                 }
-                val cellHeight = placeables[row][column]?.height ?: 0
-                rowHeights[row] = max(rowHeights[row], cellHeight)
             }
-        }
-
-        val columnOffsets = Array(columnCount + 1) { 0 }
-        for (column in 0 until columnCount) {
-            columnOffsets[column + 1] = columnOffsets[column] + columnWidths[column]
-        }
-
-        val footerPlaceable = footerMeasurable
-            .firstOrNull()
-            ?.measure(
+            val measuredRow = DataTableMeasuredRow(
+                placeables = placeables[row],
+                columnWidths = columnWidths,
+                columnAlignment = columnAlignment,
+                layoutDirection = layoutDirection,
+                isHeader = isHeader,
+                isFooter = isFooter,
+            )
+            measuredRow.background = rowBackgroundMeasurables[row].measure(
                 Constraints(
-                    minWidth = max(
-                        constraints.minWidth,
-                        columnOffsets[columnCount]
-                    )
+                    minWidth = tableWidth,
+                    maxWidth = tableWidth,
+                    minHeight = measuredRow.height,
+                    maxHeight = measuredRow.height
                 )
             )
-            ?.also {
-                rowHeights[rowCount] = it.height
+            measuredRows.add(measuredRow)
+            measuredRows.add(
+                DataTableMeasuredSimple(
+                    placeables = arrayOf(
+                        separatorMeasurables[row].measure(Constraints(minWidth = 0, maxWidth = tableWidth))
+                    ),
+                    isHeader = isHeader,
+                    isFooter = isFooter,
+                )
+            )
+        }
+
+        val footerPlaceables = footerMeasurables
+            .map {
+                it.measure(
+                    Constraints(
+                        minWidth = max(
+                            constraints.minWidth,
+                            tableWidth
+                        )
+                    )
+                )
             }
+            .toTypedArray()
+        val footerRow = DataTableMeasuredSimple(
+            placeables = footerPlaceables,
+            isHeader = false,
+            isFooter = true,
+        )
+            .also {
+                it.background = rowBackgroundMeasurables.last().measure(
+                    Constraints(
+                        minWidth = tableWidth,
+                        maxWidth = tableWidth,
+                        minHeight = it.height,
+                        maxHeight = it.height
+                    )
+                )
+            }
+        measuredRows.add(footerRow)
 
-        val tableWidth = listOf(constraints.minWidth, columnOffsets[columnCount], footerPlaceable?.width ?: 0).max()
-
-        val separatorPlaceables = separatorMeasurables.mapIndexed { index, measurable ->
-            val separatorPlaceable = measurable.measure(Constraints(minWidth = 0, maxWidth = tableWidth))
-            rowHeights[index] += separatorPlaceable.height
-            separatorPlaceable
-        }
-
-        // Compute row/column offsets.
-        val rowOffsets = Array(rowCount + 1) { 0 }
-        for (row in 0 until rowCount) {
-            rowOffsets[row + 1] = rowOffsets[row] + rowHeights[row]
-        }
-
-        val totalHeight = rowOffsets[rowCount] + (footerPlaceable?.height ?: 0)
+        val totalHeight = measuredRows.sumOf { it.height }
         state.totalHeight = totalHeight
         val tableHeight = max(constraints.minHeight, totalHeight)
 
         // TODO(calintat): Do something when these do not satisfy constraints.
         val tableSize = constraints.constrain(IntSize(tableWidth, tableHeight))
 
-        val rowBackgroundPlaceables = rowBackgroundMeasurables.mapIndexed { index, measurable ->
-            measurable.measure(
-                Constraints(
-                    minWidth = tableSize.width,
-                    maxWidth = tableSize.width,
-                    minHeight = rowHeights[index],
-                    maxHeight = rowHeights[index]
-                )
-            )
-        }
-
         layout(tableSize.width, tableSize.height) {
-            for (row in 1 until rowCount) {
-                val rowOffset = rowOffsets[row]
-                val y = rowOffset - state.offset
-                val height = rowHeights[row]
-                if (y > -height && y < state.viewportHeight) {
-                    // Place backgrounds
-                    rowBackgroundPlaceables[row].place(x = 0, y = y)
-                    // Place cells
-                    for (column in 0 until columnCount) {
-                        placeables[row][column]?.let {
-                            val position = columns[column].alignment.align(
-                                it.width, columnWidths[column], layoutDirection
-                            )
-                            it.place(
-                                x = columnOffsets[column] + position,
-                                y = y
-                            )
-                        }
-                    }
-
-                    // Place separators
-                    separatorPlaceables[row].let {
-                        it.place(x = 0, y = y + rowHeights[row] - it.height)
+            var offset = 0
+            var headerOffset = 0
+            var footerOffset = state.viewportHeight
+            measuredRows.forEach { row ->
+                if (row.isHeader) {
+                    row.position(headerOffset)
+                    headerOffset += row.height
+                } else if (row.isFooter) {
+                    footerOffset -= row.height
+                    row.position(footerOffset)
+                } else {
+                    val y = offset - state.offset
+                    offset += row.height
+                    println("Row height: ${row.height}")
+                    if (y > -row.height && y < state.viewportHeight) {
+                        row.position(y + headerOffset)
+                        row.place(this)
                     }
                 }
             }
-
-            // Draw header
-            rowBackgroundPlaceables[0].place(x = 0, y = 0)
-            for (column in 0 until columnCount) {
-                placeables[0][column]?.let {
-                    val position = columns[column].alignment.align(
-                        it.width, columnWidths[column], layoutDirection
-                    )
-                    it.place(
-                        x = columnOffsets[column] + position,
-                        y = 0
-                    )
+            // Place headers and footers last
+            measuredRows.forEach { row ->
+                if (row.isHeader || row.isFooter) {
+                    row.place(this)
                 }
             }
-
-            // Place header separator
-            separatorPlaceables[0].let {
-                it.place(x = 0, y = rowHeights[0] - it.height)
-            }
-
-            // Place footer
-            if (footerPlaceable != null) {
-                rowBackgroundPlaceables[rowCount].place(x = 0, y = state.viewportHeight - footerPlaceable.height)
-            }
-            footerPlaceable?.place(x = 0, y = state.viewportHeight - footerPlaceable.height)
         }
     }
 }
