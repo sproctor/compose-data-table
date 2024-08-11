@@ -28,11 +28,10 @@ class DataTableMeasuredRow(
         backgroundOffset = offset
         var x = 0
         placeables.forEachIndexed { index, placeable ->
-            // TODO: use alignment here
             if (placeable != null) {
                 val columnWidth = columnWidths[index]
                 placeableOffsets[index * 2] =
-                    columnAlignment[index].align(placeable.width, columnWidth, layoutDirection)
+                    x + columnAlignment[index].align(placeable.width, columnWidth, layoutDirection)
                 placeableOffsets[index * 2 + 1] = offset
                 x += columnWidth
             }
