@@ -24,7 +24,6 @@ class DataTableMeasuredRow(
     private val placeableOffsets: IntArray = IntArray(placeables.size * 2)
 
     override fun position(offset: Int) {
-        println("Positioning at $offset")
         backgroundOffset = offset
         var x = 0
         placeables.forEachIndexed { index, placeable ->

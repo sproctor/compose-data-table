@@ -317,7 +317,6 @@ fun BasicDataTable(
                 } else {
                     val y = offset - state.offset
                     offset += row.height
-                    println("Row height: ${row.height}")
                     if (y > -row.height && y < state.viewportHeight) {
                         row.position(y + headerOffset)
                         row.place(this)
