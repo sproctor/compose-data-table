@@ -11,7 +11,8 @@ class DataTableMeasuredRow(
     val columnAlignment: Array<Alignment.Horizontal>,
     private val layoutDirection: LayoutDirection,
     override val isHeader: Boolean,
-    override val isFooter: Boolean
+    override val isFooter: Boolean,
+    private val logger: ((String) -> Unit)?
 ) : DataTableMeasuredElement {
     override val height: Int = placeables.filterNotNull().maxOfOrNull { it.height } ?: 0
 
@@ -24,6 +25,7 @@ class DataTableMeasuredRow(
     private val placeableOffsets: IntArray = IntArray(placeables.size * 2)
 
     override fun position(offset: Int) {
+        logger?.invoke("Positioning row at $offset")
         backgroundOffset = offset
         var x = 0
         placeables.forEachIndexed { index, placeable ->
@@ -53,7 +55,8 @@ class DataTableMeasuredRow(
 class DataTableMeasuredSimple(
     val placeables: Array<Placeable>,
     override val isHeader: Boolean,
-    override val isFooter: Boolean
+    override val isFooter: Boolean,
+    private val logger: ((String) -> Unit)?
 ) : DataTableMeasuredElement {
 
     var background: Placeable? = null
@@ -63,6 +66,7 @@ class DataTableMeasuredSimple(
     private var offset: Int = 0
 
     override fun position(offset: Int) {
+        logger?.invoke("Positioning simple at $offset")
         this.offset = offset
     }
 

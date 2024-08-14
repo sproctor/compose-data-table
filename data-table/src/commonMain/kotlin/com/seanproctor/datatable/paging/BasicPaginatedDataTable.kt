@@ -21,6 +21,7 @@ fun BasicPaginatedDataTable(
     cellContentProvider: CellContentProvider = DefaultCellContentProvider,
     sortColumnIndex: Int? = null,
     sortAscending: Boolean = true,
+    logger: ((String) -> Unit)? = null,
     content: DataTableScope.() -> Unit
 ) {
     BasicDataTable(
@@ -35,6 +36,7 @@ fun BasicPaginatedDataTable(
         cellContentProvider = cellContentProvider,
         sortColumnIndex = sortColumnIndex,
         sortAscending = sortAscending,
+        logger = logger,
     ) {
         val start = state.pageIndex * state.pageSize
         val scope = PaginatedRowScope(start, start + state.pageSize, this)

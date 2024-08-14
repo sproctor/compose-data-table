@@ -41,6 +41,7 @@ fun DataTable(
     footer: @Composable () -> Unit = { },
     sortColumnIndex: Int? = null,
     sortAscending: Boolean = true,
+    logger: ((String) -> Unit)? = null,
     content: DataTableScope.() -> Unit
 ) {
     BasicDataTable(
@@ -56,6 +57,7 @@ fun DataTable(
         cellContentProvider = Material3CellContentProvider,
         sortColumnIndex = sortColumnIndex,
         sortAscending = sortAscending,
+        logger = logger,
         content = content
     )
 }

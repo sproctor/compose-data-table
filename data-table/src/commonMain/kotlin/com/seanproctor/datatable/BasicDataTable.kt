@@ -51,6 +51,7 @@ fun BasicDataTable(
     cellContentProvider: CellContentProvider = DefaultCellContentProvider,
     sortColumnIndex: Int? = null,
     sortAscending: Boolean = true,
+    logger: ((String) -> Unit)? = null,
     content: DataTableScope.() -> Unit
 ) {
     val headerIndexes = mutableListOf<Int>()
@@ -248,6 +249,7 @@ fun BasicDataTable(
                 layoutDirection = layoutDirection,
                 isHeader = isHeader,
                 isFooter = isFooter,
+                logger = logger,
             )
             measuredRow.background = rowBackgroundMeasurables[row].measure(
                 Constraints(
@@ -265,6 +267,7 @@ fun BasicDataTable(
                     ),
                     isHeader = isHeader,
                     isFooter = isFooter,
+                    logger = logger,
                 )
             )
         }
@@ -285,6 +288,7 @@ fun BasicDataTable(
             placeables = footerPlaceables,
             isHeader = false,
             isFooter = true,
+            logger = logger,
         )
             .also {
                 it.background = rowBackgroundMeasurables.last().measure(
@@ -302,14 +306,17 @@ fun BasicDataTable(
         state.totalHeight = totalHeight
         val tableHeight = max(constraints.minHeight, totalHeight)
 
-        // TODO(calintat): Do something when these do not satisfy constraints.
+        // TODO(sproctor): Do something when we don't fit in the width
         val tableSize = constraints.constrain(IntSize(tableWidth, tableHeight))
+
+        logger?.invoke("Data table size: $tableSize")
 
         layout(tableSize.width, tableSize.height) {
             var offset = 0
             var headerOffset = 0
             var footerOffset = state.viewportHeight
             measuredRows.forEach { row ->
+                logger?.invoke("Row height: ${row.height}")
                 if (row.isHeader) {
                     row.position(headerOffset)
                     headerOffset += row.height
