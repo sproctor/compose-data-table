@@ -117,7 +117,9 @@ fun BasicDataTable(
     val separators = @Composable {
         val rows = tableScope.tableRows.size + 1 // table rows + header
         for (row in 0 until rows) {
-            separator(row)
+            Box {
+                separator(row)
+            }
         }
     }
 
