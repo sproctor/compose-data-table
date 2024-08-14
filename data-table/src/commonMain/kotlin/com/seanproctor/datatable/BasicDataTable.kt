@@ -160,7 +160,6 @@ fun BasicDataTable(
                 interactionSource = state.internalInteractionSource,
             )
     ) { (contentMeasurables, separatorMeasurables, rowBackgroundMeasurables, footerMeasurables), constraints ->
-        state.viewportHeight = constraints.maxHeight
         val rowMeasurables = contentMeasurables.groupBy { it.rowIndex }
         val rowCount = rowMeasurables.size
         fun measurableAt(row: Int, column: Int) = rowMeasurables[row]?.getOrNull(column)
@@ -310,6 +309,8 @@ fun BasicDataTable(
         val tableSize = constraints.constrain(IntSize(tableWidth, tableHeight))
 
         logger?.invoke("Data table size: $tableSize")
+
+        state.viewportHeight = tableSize.height
 
         layout(tableSize.width, tableSize.height) {
             var offset = 0
