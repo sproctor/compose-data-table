@@ -20,19 +20,30 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Placeable
+import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.*
 import kotlin.math.max
 import kotlin.math.roundToInt
+
+private data class RowKey(val row: Int)
+
+private enum class SlotsEnum {
+    Main,
+    Footer,
+    FooterBackground,
+}
 
 /**
  * Layout model that arranges its children into rows and columns.
@@ -43,9 +54,9 @@ fun BasicDataTable(
     modifier: Modifier = Modifier,
     state: DataTableState = rememberDataTableState(),
     separator: @Composable (rowIndex: Int) -> Unit = { },
-    headerHeight: Dp = 56.dp,
-    rowHeight: Dp = 52.dp,
-    horizontalPadding: Dp = 16.dp,
+    headerHeight: Dp = Dp.Unspecified,
+    rowHeight: Dp = Dp.Unspecified,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp),
     background: Color = Color.Unspecified,
     footer: @Composable () -> Unit = { },
     cellContentProvider: CellContentProvider = DefaultCellContentProvider,
@@ -57,55 +68,37 @@ fun BasicDataTable(
     val headerIndexes = mutableListOf<Int>()
     val footerIndexes = mutableListOf<Int>()
 
-    val tableScope = DataTableScopeImpl()
-    val tableContent: @Composable () -> Unit = with(tableScope) {
-        apply(content); @Composable {
-
-        columns.forEachIndexed { columnIndex, columnDefinition ->
-            with(TableCellScopeImpl(0, columnIndex)) {
-                val cellScope = this
-                Row(
-                    Modifier.tableCell()
-                        .padding(horizontal = horizontalPadding)
-                        .height(headerHeight),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    val sorted = columnIndex == sortColumnIndex
-                    cellContentProvider.HeaderCellContent(
-                        sorted = sorted,
-                        sortAscending = sortAscending,
-                        onClick = columnDefinition.onSort?.let {
-                            { it(columnIndex, if (sorted) !sortAscending else sortAscending) }
-                        }
-                    ) {
-                        cellScope.(columnDefinition.header)()
+    val tableScope = DataTableScopeImpl(content)
+    val cellContents = @Composable {
+        with(tableScope) {
+            columns.forEachIndexed { columnIndex, columnDefinition ->
+                val sorted = columnIndex == sortColumnIndex
+                cellContentProvider.HeaderCellContent(
+                    sorted = sorted,
+                    sortAscending = sortAscending,
+                    isSortIconTrailing = columnDefinition.isSortIconTrailing,
+                    onClick = columnDefinition.onSort?.let {
+                        { it(columnIndex, if (sorted) !sortAscending else sortAscending) }
                     }
+                ) {
+                    columnDefinition.header()
                 }
             }
-        }
 
-        tableRows.forEachIndexed { rowIndex, rowData ->
-            if (rowData.isHeader) {
-                headerIndexes.add(rowIndex)
-            }
-            if (rowData.isFooter) {
-                footerIndexes.add(rowIndex)
-            }
-            with(TableRowScopeImpl(rowIndex + 1)) {
-                rowData.content(this)
-                check(cells.size <= columns.size) { "Row ${this.rowIndex} has too many cells." }
-                check(cells.size >= columns.size) { "Row ${this.rowIndex} doesn't have enough cells." }
-                cells.forEachIndexed { columnIndex, cellData ->
-                    with(TableCellScopeImpl(rowIndex + 1, columnIndex)) {
-                        val cellScope = this
-                        Row(
-                            Modifier.tableCell()
-                                .padding(horizontal = horizontalPadding)
-                                .height(rowHeight),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
+            tableRows.forEachIndexed { rowIndex, rowScope ->
+                with(rowScope) {
+                    if (isHeader) {
+                        headerIndexes.add(rowIndex)
+                    }
+                    if (isFooter) {
+                        footerIndexes.add(rowIndex)
+                    }
+                    check(cells.size <= columns.size) { "Row $rowIndex has too many cells." }
+                    check(cells.size >= columns.size) { "Row $rowIndex doesn't have enough cells." }
+                    cells.forEach { cellData ->
+                        Box(Modifier.padding(contentPadding)) {
                             cellContentProvider.RowCellContent {
-                                cellData.content(cellScope)
+                                cellData()
                             }
                         }
                     }
@@ -113,44 +106,12 @@ fun BasicDataTable(
             }
         }
     }
-    }
-
-    val separators = @Composable {
-        val rows = tableScope.tableRows.size + 1 // table rows + header
-        for (row in 0 until rows) {
-            Box {
-                separator(row)
-            }
-        }
-    }
-
-    val rowBackgrounds = @Composable {
-        // Header background
-        Box(
-            Modifier
-                .background(background)
-                .fillMaxSize()
-        )
-        // Row backgrounds
-        tableScope.tableRows.forEach {
-            Box(Modifier
-                .background(background)
-                .fillMaxSize()
-                .then(if (it.onClick != null) Modifier.clickable { it.onClick.invoke() } else Modifier)
-            )
-        }
-        // Footer background
-        Box(
-            Modifier
-                .background(background)
-                .fillMaxSize()
-        )
-    }
 
     val layoutDirection = LocalLayoutDirection.current
     val columnCount = columns.size
-    Layout(
-        listOf(tableContent, separators, rowBackgrounds, footer),
+    val rowCount = tableScope.tableRows.size
+
+    SubcomposeLayout(
         modifier
             .clip(RectangleShape)
             .then(state.awaitLayoutModifier)
@@ -159,10 +120,9 @@ fun BasicDataTable(
                 orientation = Orientation.Vertical,
                 interactionSource = state.internalInteractionSource,
             )
-    ) { (contentMeasurables, separatorMeasurables, rowBackgroundMeasurables, footerMeasurables), constraints ->
-        val rowMeasurables = contentMeasurables.groupBy { it.rowIndex }
-        val rowCount = rowMeasurables.size
-        fun measurableAt(row: Int, column: Int) = rowMeasurables[row]?.getOrNull(column)
+    ) { constraints ->
+        val cellMeasurables = subcompose(SlotsEnum.Main, cellContents)
+        fun measurableAt(row: Int, column: Int) = cellMeasurables[row * columnCount + column]
         val placeables = Array(rowCount) { arrayOfNulls<Placeable>(columnCount) }
 
         // Compute column widths and collect flex information.
@@ -176,8 +136,8 @@ fun BasicDataTable(
                 TableMeasurable(
                     preferredWidth = {
                         placeables[row][column]?.width
-                            ?: measurableAt(row, column)?.measure(Constraints())
-                                ?.also { placeables[row][column] = it }?.width ?: 0
+                            ?: measurableAt(row, column).measure(Constraints())
+                                .also { placeables[row][column] = it }.width
                     },
                     minIntrinsicWidth = {
                         val height = if (row == 0) {
@@ -185,7 +145,7 @@ fun BasicDataTable(
                         } else {
                             rowHeight.roundToPx()
                         }
-                        measurableAt(row, column)?.minIntrinsicWidth(height) ?: 0
+                        measurableAt(row, column).minIntrinsicWidth(height)
                     },
                     maxIntrinsicWidth = {
                         val height = if (row == 0) {
@@ -193,7 +153,7 @@ fun BasicDataTable(
                         } else {
                             rowHeight.roundToPx()
                         }
-                        measurableAt(row, column)?.maxIntrinsicWidth(height) ?: 0
+                        measurableAt(row, column).maxIntrinsicWidth(height)
                     }
                 )
             }
@@ -236,42 +196,47 @@ fun BasicDataTable(
             for (column in 0 until columnCount) {
                 val placeable = placeables[row][column]
                 if (placeable == null) {
-                    placeables[row][column] = measurableAt(row, column)?.measure(
+                    placeables[row][column] = measurableAt(row, column).measure(
                         Constraints(minWidth = 0, maxWidth = columnWidths[column])
                     )
                 }
             }
             val measuredRow = DataTableMeasuredRow(
                 placeables = placeables[row],
+                rowHeight = if (rowHeight == Dp.Unspecified) null else rowHeight.roundToPx(),
+                key = RowKey(row),
                 columnWidths = columnWidths,
                 columnAlignment = columnAlignment,
+                tableWidth = tableWidth,
                 layoutDirection = layoutDirection,
                 isHeader = isHeader,
                 isFooter = isFooter,
                 logger = logger,
-            )
-            measuredRow.background = rowBackgroundMeasurables[row].measure(
-                Constraints(
-                    minWidth = tableWidth,
-                    maxWidth = tableWidth,
-                    minHeight = measuredRow.height,
-                    maxHeight = measuredRow.height
-                )
+                background = {
+                    if (row == 0) {
+                        Box(
+                            Modifier
+                                .background(background)
+                                .fillMaxSize()
+                        )
+                    } else {
+                        val rowData = tableScope.tableRows[row - 1]
+                        Box(Modifier
+                            .background(background)
+                            .fillMaxSize()
+                            .then(if (rowData.onClick != null) Modifier.clickable { rowData.onClick?.invoke() } else Modifier)
+                        ) {
+                            Box(Modifier.align(Alignment.BottomStart)) {
+                                separator(row)
+                            }
+                        }
+                    }
+                }
             )
             measuredRows.add(measuredRow)
-            measuredRows.add(
-                DataTableMeasuredSimple(
-                    placeables = arrayOf(
-                        separatorMeasurables[row].measure(Constraints(minWidth = 0, maxWidth = tableWidth))
-                    ),
-                    isHeader = isHeader,
-                    isFooter = isFooter,
-                    logger = logger,
-                )
-            )
         }
 
-        val footerPlaceables = footerMeasurables
+        val footerPlaceables = subcompose(SlotsEnum.Footer, footer)
             .map {
                 it.measure(
                     Constraints(
@@ -285,20 +250,19 @@ fun BasicDataTable(
             .toTypedArray()
         val footerRow = DataTableMeasuredSimple(
             placeables = footerPlaceables,
+            key = SlotsEnum.FooterBackground,
             isHeader = false,
             isFooter = true,
+            tableWidth = tableWidth,
+            background = {
+                Box(
+                    Modifier
+                        .background(background)
+                        .fillMaxSize()
+                )
+            },
             logger = logger,
         )
-            .also {
-                it.background = rowBackgroundMeasurables.last().measure(
-                    Constraints(
-                        minWidth = tableWidth,
-                        maxWidth = tableWidth,
-                        minHeight = it.height,
-                        maxHeight = it.height
-                    )
-                )
-            }
         measuredRows.add(footerRow)
 
         val totalHeight = measuredRows.sumOf { it.height }
@@ -329,14 +293,14 @@ fun BasicDataTable(
                     offset += row.height
                     if (y > -row.height && y < state.viewportHeight) {
                         row.position(y + headerOffset)
-                        row.place(this)
+                        row.place(this@SubcomposeLayout, this)
                     }
                 }
             }
             // Place headers and footers last
             measuredRows.forEach { row ->
                 if (row.isHeader || row.isFooter) {
-                    row.place(this)
+                    row.place(this@SubcomposeLayout, this)
                 }
             }
         }

@@ -27,7 +27,7 @@ fun PaginatedDataTable(
     separator: @Composable (rowIndex: Int) -> Unit = { Divider() },
     headerHeight: Dp = 56.dp,
     rowHeight: Dp = 52.dp,
-    horizontalPadding: Dp = 16.dp,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp),
     background: Color = MaterialTheme.colors.surface,
     state: PaginatedDataTableState = rememberPaginatedDataTableState(10),
     sortColumnIndex: Int? = null,
@@ -39,7 +39,7 @@ fun PaginatedDataTable(
         modifier = modifier,
         separator = separator,
         headerHeight = headerHeight,
-        horizontalPadding = horizontalPadding,
+        contentPadding = contentPadding,
         background = background,
         state = state,
         footer = {

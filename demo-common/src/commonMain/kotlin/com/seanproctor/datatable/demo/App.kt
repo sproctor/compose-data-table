@@ -1,21 +1,21 @@
 package com.seanproctor.datatable.demo
 
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.dp
 import com.seanproctor.datatable.DataColumn
 import com.seanproctor.datatable.material3.DataTable
-import com.seanproctor.datatable.material3.PaginatedDataTable
-import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
 
 @Composable
 fun App(onRowClick: (Int) -> Unit) {
-    val rowData = (0 until 100).map { index ->
+    val rowData = (0 until 30).map { index ->
         DemoData(index + 1f, "Row: $index")
     }
     var sortColumnIndex by remember { mutableStateOf<Int?>(null) }
@@ -28,6 +28,7 @@ fun App(onRowClick: (Int) -> Unit) {
         else -> throw IllegalStateException("Invalid column index")
     }
 
+    LazyColumn {  }
     DataTable(
         columns = listOf(
             DataColumn(
@@ -39,7 +40,8 @@ fun App(onRowClick: (Int) -> Unit) {
                 Text("Column1")
             },
             DataColumn(
-                alignment = Alignment.End,
+                alignment = Alignment.CenterEnd,
+                isSortIconTrailing = false,
                 onSort = { index, ascending ->
                     sortColumnIndex = index
                     sortAscending = ascending
@@ -51,10 +53,12 @@ fun App(onRowClick: (Int) -> Unit) {
         //state = rememberPaginatedDataTableState(15),
         sortColumnIndex = sortColumnIndex,
         sortAscending = sortAscending,
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxWidth().padding(16.dp),
+        logger = { println(it) }
     ) {
         sortedData.forEachIndexed { index, data ->
-            row(onClick = { onRowClick(index) }) {
+            row {
+                onClick = { onRowClick(index) }
                 cell {
                     Text(data.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
                 }
@@ -63,12 +67,16 @@ fun App(onRowClick: (Int) -> Unit) {
                 }
             }
         }
-        row(isFooter = true) {
+        row {
+            isFooter = true
+            cell { }
             cell {
-                Text("Footer", maxLines = 1, overflow = TextOverflow.Ellipsis)
-            }
-            cell {
-                Text("Footer value")
+                Text(
+                    text = "Footer",
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    style = MaterialTheme.typography.titleLarge
+                )
             }
         }
     }

@@ -1,22 +1,29 @@
 package com.seanproctor.datatable
 
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.Placeable
+import androidx.compose.ui.layout.SubcomposeMeasureScope
+import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 
 class DataTableMeasuredRow(
     val placeables: Array<Placeable?>,
+    private val key: Any,
+    val rowHeight: Int?,
     val columnWidths: Array<Int>,
-    val columnAlignment: Array<Alignment.Horizontal>,
+    val columnAlignment: Array<Alignment>,
+    private val tableWidth: Int,
     private val layoutDirection: LayoutDirection,
     override val isHeader: Boolean,
     override val isFooter: Boolean,
-    private val logger: ((String) -> Unit)?
+    private val logger: ((String) -> Unit)?,
+    private val background: @Composable (() -> Unit)
 ) : DataTableMeasuredElement {
-    override val height: Int = placeables.filterNotNull().maxOfOrNull { it.height } ?: 0
-
-    var background: Placeable? = null
+    override val height: Int = rowHeight ?: placeables.filterNotNull().maxOfOrNull { it.height } ?: 0
 
     private var backgroundOffset: Int = 0
 
@@ -31,9 +38,14 @@ class DataTableMeasuredRow(
         placeables.forEachIndexed { index, placeable ->
             if (placeable != null) {
                 val columnWidth = columnWidths[index]
+                val alignmentOffset = columnAlignment[index].align(
+                    size = IntSize(placeable.width, placeable.height),
+                    space = IntSize(columnWidth, rowHeight ?: 0),
+                    layoutDirection = layoutDirection
+                )
                 placeableOffsets[index * 2] =
-                    x + columnAlignment[index].align(placeable.width, columnWidth, layoutDirection)
-                placeableOffsets[index * 2 + 1] = offset
+                    x + alignmentOffset.x
+                placeableOffsets[index * 2 + 1] = offset + alignmentOffset.y
                 x += columnWidth
             }
         }
@@ -43,23 +55,38 @@ class DataTableMeasuredRow(
         return IntOffset(placeableOffsets[index * 2], placeableOffsets[index * 2 + 1])
     }
 
-    override fun place(scope: Placeable.PlacementScope) = with(scope) {
-        background?.place(0, backgroundOffset)
-        placeables.forEachIndexed { index, placeable ->
-            val offset = getOffset(index)
-            placeable?.place(offset)
+    override fun place(subcomposeScope: SubcomposeMeasureScope, placementBlock: Placeable.PlacementScope) {
+        with(placementBlock) {
+            with(subcomposeScope) {
+                subcompose(key, background).map {
+                    it.measure(
+                        Constraints(
+                            minHeight = height,
+                            maxHeight = height,
+                            minWidth = tableWidth,
+                            maxWidth = tableWidth,
+                        )
+                    )
+                        .place(0, backgroundOffset)
+                }
+            }
+            placeables.forEachIndexed { index, placeable ->
+                val offset = getOffset(index)
+                placeable?.place(offset)
+            }
         }
     }
 }
 
 class DataTableMeasuredSimple(
     val placeables: Array<Placeable>,
+    private val key: Any,
     override val isHeader: Boolean,
     override val isFooter: Boolean,
-    private val logger: ((String) -> Unit)?
+    private val tableWidth: Int,
+    private val logger: ((String) -> Unit)?,
+    private val background: @Composable (() -> Unit)
 ) : DataTableMeasuredElement {
-
-    var background: Placeable? = null
 
     override val height: Int = placeables.maxOfOrNull { it.height } ?: 0
 
@@ -70,10 +97,24 @@ class DataTableMeasuredSimple(
         this.offset = offset
     }
 
-    override fun place(scope: Placeable.PlacementScope) = with(scope) {
-        background?.place(0, offset)
-        placeables.forEachIndexed { index, placeable ->
-            placeable.place(0, offset)
+    override fun place(subcomposeScope: SubcomposeMeasureScope, placementBlock: Placeable.PlacementScope) {
+        with(placementBlock) {
+            with(subcomposeScope) {
+                subcompose(key, background).map {
+                    it.measure(
+                        Constraints(
+                            minHeight = height,
+                            maxHeight = height,
+                            minWidth = tableWidth,
+                            maxWidth = tableWidth,
+                        )
+                    )
+                        .place(0, offset)
+                }
+            }
+            placeables.forEach { placeable ->
+                placeable.place(0, offset)
+            }
         }
     }
 }
@@ -85,5 +126,5 @@ interface DataTableMeasuredElement {
 
     fun position(offset: Int)
 
-    fun place(scope: Placeable.PlacementScope)
+    fun place(subcomposeScope: SubcomposeMeasureScope, placementBlock: Placeable.PlacementScope)
 }

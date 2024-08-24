@@ -21,11 +21,17 @@ object MaterialCellContentProvider : CellContentProvider {
     override fun HeaderCellContent(
         sorted: Boolean,
         sortAscending: Boolean,
+        isSortIconTrailing: Boolean,
         onClick: (() -> Unit)?,
         content: @Composable () -> Unit
     ) {
         CompositionLocalProvider(LocalTextStyle provides MaterialTheme.typography.subtitle2) {
             if (onClick != null) {
+                if (isSortIconTrailing) {
+                    TextButton(onClick = onClick) {
+                        content()
+                    }
+                }
                 if (sorted) {
                     IconButton(
                         onClick = onClick
@@ -37,8 +43,10 @@ object MaterialCellContentProvider : CellContentProvider {
                         }
                     }
                 }
-                TextButton(onClick = onClick) {
-                    content()
+                if (!isSortIconTrailing) {
+                    TextButton(onClick = onClick) {
+                        content()
+                    }
                 }
             } else {
                 content()

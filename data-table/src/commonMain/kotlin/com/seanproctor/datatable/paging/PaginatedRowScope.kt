@@ -10,14 +10,9 @@ internal class PaginatedRowScope(
 ) : DataTableScope {
     var index: Int = 0
 
-    override fun row(
-        onClick: (() -> Unit)?,
-        isHeader: Boolean,
-        isFooter: Boolean,
-        content: TableRowScope.() -> Unit
-    ) {
+    override fun row(content: TableRowScope.() -> Unit) {
         if (index in from until to) {
-            parentScope.row(onClick, isHeader, isFooter, content)
+            parentScope.row(content)
         }
         index++
     }

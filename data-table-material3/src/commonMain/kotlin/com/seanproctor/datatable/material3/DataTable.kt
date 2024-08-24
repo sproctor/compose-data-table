@@ -16,6 +16,7 @@
 
 package com.seanproctor.datatable.material3
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -36,7 +37,7 @@ fun DataTable(
     separator: @Composable (rowIndex: Int) -> Unit = { HorizontalDivider() },
     headerHeight: Dp = 56.dp,
     rowHeight: Dp = 52.dp,
-    horizontalPadding: Dp = 16.dp,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp),
     background: Color = MaterialTheme.colorScheme.surface,
     footer: @Composable () -> Unit = { },
     sortColumnIndex: Int? = null,
@@ -51,7 +52,7 @@ fun DataTable(
         separator = separator,
         headerHeight = headerHeight,
         rowHeight = rowHeight,
-        horizontalPadding = horizontalPadding,
+        contentPadding = contentPadding,
         background = background,
         footer = footer,
         cellContentProvider = Material3CellContentProvider,
