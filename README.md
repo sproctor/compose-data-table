@@ -12,10 +12,10 @@ The original code is derived from the implementation that was removed from Compo
 
 Add the dependency to your gradle build file:
 
-Material 2:
+Non-material version:
 
 ```kotlin
-implementation("com.seanproctor:data-table-material:<VERSION>")
+implementation("com.seanproctor:data-table:<VERSION>")
 ```
 
 Material 3:
