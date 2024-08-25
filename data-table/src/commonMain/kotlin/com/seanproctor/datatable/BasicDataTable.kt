@@ -81,7 +81,9 @@ fun BasicDataTable(
                         { it(columnIndex, if (sorted) !sortAscending else sortAscending) }
                     }
                 ) {
-                    columnDefinition.header()
+                    Box {
+                        columnDefinition.header()
+                    }
                 }
             }
 
