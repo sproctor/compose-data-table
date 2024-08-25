@@ -20,7 +20,7 @@ package com.seanproctor.datatable
  * Collects measurements for the children of a column that
  * are available to implementations of [TableColumnWidth].
  */
-data class TableMeasurable internal constructor(
+class TableMeasurable internal constructor(
     /**
      * Computes the preferred width of the child by measuring with infinite constraints.
      */
