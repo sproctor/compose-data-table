@@ -109,7 +109,7 @@ fun BasicDataTable(
 
     val layoutDirection = LocalLayoutDirection.current
     val columnCount = columns.size
-    val rowCount = tableScope.tableRows.size
+    val rowCount = tableScope.tableRows.size + 1
 
     SubcomposeLayout(
         modifier
@@ -140,20 +140,20 @@ fun BasicDataTable(
                                 .also { placeables[row][column] = it }.width
                     },
                     minIntrinsicWidth = {
-                        val height = if (row == 0) {
-                            headerHeight.roundToPx()
+                        val heightDp = if (row == 0) {
+                            headerHeight
                         } else {
-                            rowHeight.roundToPx()
+                            rowHeight
                         }
-                        measurableAt(row, column).minIntrinsicWidth(height)
+                        measurableAt(row, column).minIntrinsicWidth(heightDp.roundToPxOrInf(this))
                     },
                     maxIntrinsicWidth = {
-                        val height = if (row == 0) {
-                            headerHeight.roundToPx()
+                        val heightDp = if (row == 0) {
+                            headerHeight
                         } else {
-                            rowHeight.roundToPx()
+                            rowHeight
                         }
-                        measurableAt(row, column).maxIntrinsicWidth(height)
+                        measurableAt(row, column).maxIntrinsicWidth(heightDp.roundToPxOrInf(this))
                     }
                 )
             }
@@ -203,7 +203,7 @@ fun BasicDataTable(
             }
             val measuredRow = DataTableMeasuredRow(
                 placeables = placeables[row],
-                rowHeight = if (rowHeight == Dp.Unspecified) null else rowHeight.roundToPx(),
+                rowHeight = if (rowHeight.isSpecified) rowHeight.roundToPx() else null,
                 key = RowKey(row),
                 columnWidths = columnWidths,
                 columnAlignment = columnAlignment,
@@ -281,7 +281,6 @@ fun BasicDataTable(
             var headerOffset = 0
             var footerOffset = state.viewportHeight
             measuredRows.forEach { row ->
-                logger?.invoke("Row height: ${row.height}")
                 if (row.isHeader) {
                     row.position(headerOffset)
                     headerOffset += row.height
@@ -304,5 +303,15 @@ fun BasicDataTable(
                 }
             }
         }
+    }
+}
+
+fun Dp.roundToPxOrInf(density: Density): Int {
+    return if (isSpecified && isFinite) {
+        with(density) {
+            roundToPx()
+        }
+    } else {
+        Int.MAX_VALUE
     }
 }

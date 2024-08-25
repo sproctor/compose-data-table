@@ -2,7 +2,6 @@ package com.seanproctor.datatable
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.SubcomposeMeasureScope
 import androidx.compose.ui.unit.Constraints
@@ -40,7 +39,7 @@ class DataTableMeasuredRow(
                 val columnWidth = columnWidths[index]
                 val alignmentOffset = columnAlignment[index].align(
                     size = IntSize(placeable.width, placeable.height),
-                    space = IntSize(columnWidth, rowHeight ?: 0),
+                    space = IntSize(columnWidth, height),
                     layoutDirection = layoutDirection
                 )
                 placeableOffsets[index * 2] =
