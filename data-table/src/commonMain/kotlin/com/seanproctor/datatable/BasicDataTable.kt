@@ -81,6 +81,7 @@ fun BasicDataTable(
                         { it(columnIndex, if (sorted) !sortAscending else sortAscending) }
                     }
                 ) {
+                    // Must have exactly 1 Composable per cell
                     Box {
                         columnDefinition.header()
                     }
@@ -98,6 +99,7 @@ fun BasicDataTable(
                     check(cells.size <= columns.size) { "Row $rowIndex has too many cells." }
                     check(cells.size >= columns.size) { "Row $rowIndex doesn't have enough cells." }
                     cells.forEach { cellData ->
+                        // Must have exactly 1 Composable per cell
                         Box(Modifier.padding(contentPadding)) {
                             cellContentProvider.RowCellContent {
                                 cellData()
