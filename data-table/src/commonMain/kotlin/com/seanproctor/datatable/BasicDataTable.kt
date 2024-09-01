@@ -53,12 +53,14 @@ fun BasicDataTable(
     columns: List<DataColumn>,
     modifier: Modifier = Modifier,
     state: DataTableState = rememberDataTableState(),
-    separator: @Composable (rowIndex: Int) -> Unit = { },
+    separator: @Composable () -> Unit = { },
     headerHeight: Dp = Dp.Unspecified,
     rowHeight: Dp = Dp.Unspecified,
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp),
-    background: Color = Color.Unspecified,
-    footer: @Composable () -> Unit = { },
+    headerBackgroundColor: Color = Color.Unspecified,
+    footerBackgroundColor: Color = Color.Unspecified,
+    rowBackgroundColor: @Composable (Int) -> Color = { Color.Unspecified },
+    footer: (@Composable () -> Unit)? = null,
     cellContentProvider: CellContentProvider = DefaultCellContentProvider,
     sortColumnIndex: Int? = null,
     sortAscending: Boolean = true,
@@ -220,18 +222,24 @@ fun BasicDataTable(
                     if (row == 0) {
                         Box(
                             Modifier
-                                .background(background)
+                                .background(headerBackgroundColor)
                                 .fillMaxSize()
-                        )
+                        ) {
+                            Box(Modifier.align(Alignment.BottomStart)) {
+                                separator()
+                            }
+                        }
                     } else {
                         val rowData = tableScope.tableRows[row - 1]
                         Box(Modifier
-                            .background(background)
+                            .background(rowBackgroundColor(row - 1))
                             .fillMaxSize()
                             .then(if (rowData.onClick != null) Modifier.clickable { rowData.onClick?.invoke() } else Modifier)
                         ) {
-                            Box(Modifier.align(Alignment.BottomStart)) {
-                                separator(row)
+                            if (row < rowCount - 1) {
+                                Box(Modifier.align(Alignment.BottomStart)) {
+                                    separator()
+                                }
                             }
                         }
                     }
@@ -240,34 +248,36 @@ fun BasicDataTable(
             measuredRows.add(measuredRow)
         }
 
-        val footerPlaceables = subcompose(SlotsEnum.Footer, footer)
-            .map {
-                it.measure(
-                    Constraints(
-                        minWidth = max(
-                            constraints.minWidth,
-                            tableWidth
+        if (footer != null) {
+            val footerPlaceables = subcompose(SlotsEnum.Footer, footer)
+                .map {
+                    it.measure(
+                        Constraints(
+                            minWidth = max(
+                                constraints.minWidth,
+                                tableWidth
+                            )
                         )
                     )
-                )
-            }
-            .toTypedArray()
-        val footerRow = DataTableMeasuredSimple(
-            placeables = footerPlaceables,
-            key = SlotsEnum.FooterBackground,
-            isHeader = false,
-            isFooter = true,
-            tableWidth = tableWidth,
-            background = {
-                Box(
-                    Modifier
-                        .background(background)
-                        .fillMaxSize()
-                )
-            },
-            logger = logger,
-        )
-        measuredRows.add(footerRow)
+                }
+                .toTypedArray()
+            val footerRow = DataTableMeasuredSimple(
+                placeables = footerPlaceables,
+                key = SlotsEnum.FooterBackground,
+                isHeader = false,
+                isFooter = true,
+                tableWidth = tableWidth,
+                background = {
+                    Box(
+                        Modifier
+                            .background(footerBackgroundColor)
+                            .fillMaxSize()
+                    )
+                },
+                logger = logger,
+            )
+            measuredRows.add(footerRow)
+        }
 
         val totalHeight = measuredRows.sumOf { it.height }
         state.totalHeight = totalHeight

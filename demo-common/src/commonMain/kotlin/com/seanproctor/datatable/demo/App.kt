@@ -34,7 +34,7 @@ fun App(onRowClick: (Int) -> Unit) {
             }
         }
         val rowData = (0 until 30).map { index ->
-            DemoData(index + 1f, "Row: $index")
+            DemoData(index + 1f, "index: $index")
         }
         var sortColumnIndex by remember { mutableStateOf<Int?>(null) }
         var sortAscending by remember { mutableStateOf(true) }
@@ -107,6 +107,7 @@ fun DataTableScope.generateTable(data: List<DemoData>, onRowClick: (Int) -> Unit
             }
         }
     }
+    // Footer does not work well with PaginatedDataTable
     row {
         isFooter = true
         cell { }

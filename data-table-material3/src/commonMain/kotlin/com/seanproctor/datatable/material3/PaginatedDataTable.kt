@@ -17,19 +17,20 @@ import com.seanproctor.datatable.DataColumn
 import com.seanproctor.datatable.DataTableScope
 import com.seanproctor.datatable.paging.BasicPaginatedDataTable
 import com.seanproctor.datatable.paging.PaginatedDataTableState
-import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
 import kotlin.math.min
 
 @Composable
 fun PaginatedDataTable(
     columns: List<DataColumn>,
+    state: PaginatedDataTableState,
     modifier: Modifier = Modifier,
-    separator: @Composable (rowIndex: Int) -> Unit = { HorizontalDivider() },
+    separator: @Composable () -> Unit = { HorizontalDivider() },
     headerHeight: Dp = 56.dp,
     rowHeight: Dp = 52.dp,
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp),
-    background: Color = MaterialTheme.colorScheme.surface,
-    state: PaginatedDataTableState = rememberPaginatedDataTableState(10),
+    headerBackgroundColor: Color = MaterialTheme.colorScheme.surface,
+    footerBackgroundColor: Color = MaterialTheme.colorScheme.surface,
+    rowBackgroundColor: @Composable (Int) -> Color = { MaterialTheme.colorScheme.surface },
     sortColumnIndex: Int? = null,
     sortAscending: Boolean = true,
     logger: ((String) -> Unit)? = null,
@@ -42,7 +43,9 @@ fun PaginatedDataTable(
         headerHeight = headerHeight,
         rowHeight = rowHeight,
         contentPadding = contentPadding,
-        background = background,
+        headerBackgroundColor = headerBackgroundColor,
+        footerBackgroundColor = footerBackgroundColor,
+        rowBackgroundColor = rowBackgroundColor,
         state = state,
         footer = {
             Row(
