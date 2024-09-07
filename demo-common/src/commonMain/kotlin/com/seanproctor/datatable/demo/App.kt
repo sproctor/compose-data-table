@@ -13,8 +13,11 @@ import com.seanproctor.datatable.DataColumn
 import com.seanproctor.datatable.DataTableScope
 import com.seanproctor.datatable.TableColumnWidth
 import com.seanproctor.datatable.material3.DataTable
+import com.seanproctor.datatable.material3.LazyPaginatedDataTable
 import com.seanproctor.datatable.material3.PaginatedDataTable
+import com.seanproctor.datatable.paging.rememberLazyPaginatedDataTableState
 import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
+import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -24,7 +27,7 @@ fun App(onRowClick: (Int) -> Unit) {
         PrimaryTabRow(
             selectedTabIndex = selectedIndex
         ) {
-            val titles = listOf("Normal", "Paginated")
+            val titles = listOf("Normal", "Paginated", "Lazy paginated")
             titles.forEachIndexed { index, title ->
                 Tab(
                     selected = index == selectedIndex,
@@ -79,7 +82,7 @@ fun App(onRowClick: (Int) -> Unit) {
             ) {
                 generateTable(sortedData, onRowClick)
             }
-        } else {
+        } else if (selectedIndex == 1) {
             PaginatedDataTable(
                 columns = columns,
                 state = rememberPaginatedDataTableState(5),
@@ -90,6 +93,32 @@ fun App(onRowClick: (Int) -> Unit) {
             ) {
                 generateTable(sortedData, onRowClick)
             }
+        } else {
+            LazyPaginatedDataTable(
+                columns = columns,
+                state = rememberLazyPaginatedDataTableState(8, 30),
+                sortColumnIndex = sortColumnIndex,
+                sortAscending = sortAscending,
+                modifier = Modifier.fillMaxWidth().padding(16.dp),
+                logger = { println(it) },
+                fetchPage = { state ->
+                    val fromIndex = state.pageIndex * state.pageSize
+                    val toIndex = min(fromIndex + state.pageSize, state.count-1)
+                    val subset = sortedData.subList(fromIndex, toIndex)
+                    subset.forEachIndexed { index, rowData ->
+                        row {
+                            onClick = { onRowClick(fromIndex + index) }
+                            cell { }
+                            cell {
+                                Text(rowData.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                            }
+                            cell {
+                                Text(rowData.value.toString())
+                            }
+                        }
+                    }
+                }
+            )
         }
     }
 }
