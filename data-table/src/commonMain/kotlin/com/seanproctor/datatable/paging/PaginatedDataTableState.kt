@@ -8,13 +8,13 @@ import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 
-class PaginatedDataTableState(
+open class PaginatedDataTableState(
     pageSize: Int,
     pageIndex: Int,
 ) {
     var pageSize by mutableStateOf(pageSize)
     var pageIndex by mutableStateOf(pageIndex)
-    var count by mutableStateOf(0)
+    open var count by mutableStateOf(0)
 
     companion object {
         val Saver: Saver<PaginatedDataTableState, *> = listSaver(
