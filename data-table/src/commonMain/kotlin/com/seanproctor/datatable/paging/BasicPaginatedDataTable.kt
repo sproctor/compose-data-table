@@ -30,6 +30,7 @@ fun BasicPaginatedDataTable(
     BasicDataTable(
         columns = columns,
         modifier = modifier,
+        state = remember(state.pageSize, state.pageIndex) { DataTableState() },
         separator = separator,
         headerHeight = headerHeight,
         rowHeight = rowHeight,
