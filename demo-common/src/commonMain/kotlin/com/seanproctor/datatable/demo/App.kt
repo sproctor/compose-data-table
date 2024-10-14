@@ -15,7 +15,6 @@ import com.seanproctor.datatable.TableColumnWidth
 import com.seanproctor.datatable.material3.DataTable
 import com.seanproctor.datatable.material3.LazyPaginatedDataTable
 import com.seanproctor.datatable.material3.PaginatedDataTable
-import com.seanproctor.datatable.paging.rememberLazyPaginatedDataTableState
 import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
 import kotlin.math.min
 
@@ -96,7 +95,7 @@ fun App(onRowClick: (Int) -> Unit) {
         } else {
             LazyPaginatedDataTable(
                 columns = columns,
-                state = rememberLazyPaginatedDataTableState(8, 30),
+                state = rememberPaginatedDataTableState(5),
                 sortColumnIndex = sortColumnIndex,
                 sortAscending = sortAscending,
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
