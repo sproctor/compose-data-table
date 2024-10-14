@@ -12,12 +12,12 @@ vanniktech-base = { id = "com.vanniktech.maven.publish.base", version.ref = "van
 
 [versions]
 
-activityCompose = "1.9.1"
+activityCompose = "1.9.2"
 androidGradlePlugin = "8.5.2"
 compose = "1.6.11"
 junit = "4.13.2"
-kotlin = "2.0.20"
-vanniktech = "0.29.0"
+kotlin = "2.0.21"
+vanniktech = "0.30.0"
 
 [libraries]
 
