@@ -30,10 +30,10 @@ class DataTableMeasuredRow(
     // array's size == placeables.size * 2, first we store x, then y.
     private val placeableOffsets: IntArray = IntArray(placeables.size * 2)
 
-    override fun position(offset: Int) {
+    override fun position(offset: IntOffset) {
         logger?.invoke("Positioning row at $offset")
-        backgroundOffset = offset
-        var x = 0
+        backgroundOffset = offset.y
+        var x = offset.x
         placeables.forEachIndexed { index, placeable ->
             if (placeable != null) {
                 val columnWidth = columnWidths[index]
@@ -44,7 +44,7 @@ class DataTableMeasuredRow(
                 )
                 placeableOffsets[index * 2] =
                     x + alignmentOffset.x
-                placeableOffsets[index * 2 + 1] = offset + alignmentOffset.y
+                placeableOffsets[index * 2 + 1] = offset.y + alignmentOffset.y
                 x += columnWidth
             }
         }
@@ -89,9 +89,9 @@ class DataTableMeasuredSimple(
 
     override val height: Int = placeables.maxOfOrNull { it.height } ?: 0
 
-    private var offset: Int = 0
+    private var offset: IntOffset = IntOffset.Zero
 
-    override fun position(offset: Int) {
+    override fun position(offset: IntOffset) {
         logger?.invoke("Positioning simple at $offset")
         this.offset = offset
     }
@@ -108,11 +108,11 @@ class DataTableMeasuredSimple(
                             maxWidth = tableWidth,
                         )
                     )
-                        .place(0, offset)
+                        .place(offset)
                 }
             }
             placeables.forEach { placeable ->
-                placeable.place(0, offset)
+                placeable.place(offset)
             }
         }
     }
@@ -123,7 +123,11 @@ interface DataTableMeasuredElement {
     val isFooter: Boolean
     val height: Int
 
-    fun position(offset: Int)
+    fun position(offset: IntOffset)
+
+    fun position(x: Int, y: Int) {
+        position(IntOffset(x, y))
+    }
 
     fun place(subcomposeScope: SubcomposeMeasureScope, placementBlock: Placeable.PlacementScope)
 }

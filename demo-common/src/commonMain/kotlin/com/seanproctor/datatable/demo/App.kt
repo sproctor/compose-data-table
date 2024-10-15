@@ -1,17 +1,15 @@
 package com.seanproctor.datatable.demo
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.seanproctor.datatable.DataColumn
-import com.seanproctor.datatable.DataTableScope
-import com.seanproctor.datatable.TableColumnWidth
+import com.seanproctor.datatable.*
 import com.seanproctor.datatable.material3.DataTable
 import com.seanproctor.datatable.material3.LazyPaginatedDataTable
 import com.seanproctor.datatable.material3.PaginatedDataTable
@@ -71,15 +69,25 @@ fun App(onRowClick: (Int) -> Unit) {
             }
         )
 
+        val scrollState = remember(selectedIndex) { DataTableState() }
         if (selectedIndex == 0) {
-            DataTable(
-                columns = columns,
-                sortColumnIndex = sortColumnIndex,
-                sortAscending = sortAscending,
-                modifier = Modifier.fillMaxWidth().padding(16.dp),
-                logger = { println(it) }
-            ) {
-                generateTable(sortedData, onRowClick)
+            Box {
+                DataTable(
+                    columns = columns,
+                    state = scrollState,
+                    sortColumnIndex = sortColumnIndex,
+                    sortAscending = sortAscending,
+                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+//                    logger = { println(it) }
+                ) {
+                    generateTable(sortedData, onRowClick)
+                }
+                LaunchedEffect(scrollState.horizontalScrollState.viewportSize) {
+                    println("viewport: ${scrollState.horizontalScrollState.viewportSize}")
+                    println("total size: ${scrollState.horizontalScrollState.totalSize}")
+                }
+                VerticalScrollbar(scrollState.verticalScrollState, Modifier.fillMaxHeight().align(Alignment.CenterEnd))
+                HorizontalScrollbar(scrollState.horizontalScrollState, Modifier.fillMaxWidth().align(Alignment.BottomCenter))
             }
         } else if (selectedIndex == 1) {
             PaginatedDataTable(

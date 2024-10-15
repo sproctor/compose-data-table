@@ -120,11 +120,17 @@ fun BasicDataTable(
     SubcomposeLayout(
         modifier
             .clip(RectangleShape)
-            .then(state.awaitLayoutModifier)
+            .then(state.verticalScrollState.awaitLayoutModifier)
             .scrollable(
-                state = state,
+                state = state.verticalScrollState,
                 orientation = Orientation.Vertical,
-                interactionSource = state.internalInteractionSource,
+                interactionSource = state.verticalScrollState.internalInteractionSource,
+            )
+            .then(state.horizontalScrollState.awaitLayoutModifier)
+            .scrollable(
+                state = state.horizontalScrollState,
+                orientation = Orientation.Horizontal,
+                interactionSource = state.horizontalScrollState.internalInteractionSource,
             )
     ) { constraints ->
         val cellMeasurables = subcompose(SlotsEnum.Main, cellContents)
@@ -190,7 +196,8 @@ fun BasicDataTable(
             }
         }
 
-        val tableWidth = listOf(constraints.minWidth, columnWidths.sum()).max()
+        val totalWidth = columnWidths.sum()
+        val tableWidth = totalWidth.coerceIn(constraints.minWidth, constraints.maxWidth)
 
         val columnAlignment = Array(columnCount) { columns[it].alignment }
 
@@ -280,32 +287,36 @@ fun BasicDataTable(
         }
 
         val totalHeight = measuredRows.sumOf { it.height }
-        state.totalHeight = totalHeight
+
+        state.verticalScrollState.totalSize = totalHeight
+        state.horizontalScrollState.totalSize = totalWidth
+
         val tableHeight = max(constraints.minHeight, totalHeight)
 
-        // TODO(sproctor): Do something when we don't fit in the width
         val tableSize = constraints.constrain(IntSize(tableWidth, tableHeight))
 
         logger?.invoke("Data table size: $tableSize")
 
-        state.viewportHeight = tableSize.height
+        state.verticalScrollState.viewportSize = tableSize.height
+        state.horizontalScrollState.viewportSize = tableSize.width
 
         layout(tableSize.width, tableSize.height) {
             var offset = 0
             var headerOffset = 0
-            var footerOffset = state.viewportHeight
+            var footerOffset = state.verticalScrollState.viewportSize
+            val offsetX = -state.horizontalScrollState.offset
             measuredRows.forEach { row ->
                 if (row.isHeader) {
-                    row.position(headerOffset)
+                    row.position(offsetX, headerOffset)
                     headerOffset += row.height
                 } else if (row.isFooter) {
                     footerOffset -= row.height
-                    row.position(footerOffset)
+                    row.position(offsetX, footerOffset)
                 } else {
-                    val y = offset - state.offset
+                    val y = offset - state.verticalScrollState.offset
                     offset += row.height
-                    if (y > -row.height && y < state.viewportHeight) {
-                        row.position(y + headerOffset)
+                    if (y > -row.height && y < state.verticalScrollState.viewportSize) {
+                        row.position(offsetX, y + headerOffset)
                         row.place(this@SubcomposeLayout, this)
                     }
                 }

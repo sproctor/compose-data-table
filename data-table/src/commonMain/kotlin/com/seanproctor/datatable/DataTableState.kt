@@ -3,10 +3,10 @@ package com.seanproctor.datatable
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.gestures.ScrollScope
 import androidx.compose.foundation.gestures.ScrollableState
+import androidx.compose.foundation.gestures.scrollBy
 import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.*
-import androidx.compose.ui.unit.IntSize
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -18,15 +18,23 @@ fun rememberDataTableState(): DataTableState {
 }
 
 @Stable
-class DataTableState : ScrollableState {
+class DataTableState {
+    val verticalScrollState: DataTableScrollState = DataTableScrollState()
+    val horizontalScrollState: DataTableScrollState = DataTableScrollState()
+}
+
+@Stable
+class DataTableScrollState : ScrollableState {
 
     // TODO: This really needs improvement
     var offset: Int by mutableIntStateOf(0)
         private set
 
-    internal var viewportHeight: Int = 0
+    var viewportSize: Int by mutableIntStateOf(0)
+        internal set
 
-    internal var totalHeight: Int = 0
+    var totalSize: Int by mutableIntStateOf(0)
+        internal set
 
     /**
      * Provides a modifier which allows to delay some interactions (e.g. scroll)
@@ -38,13 +46,12 @@ class DataTableState : ScrollableState {
      * The amount of scroll to be consumed in the next layout pass.  Scrolling forward is negative
      * - that is, it is the amount that the items are offset in y
      */
-    internal var scrollToBeConsumed = 0f
-        private set
+    private var scrollToBeConsumed = 0f
 
     override val canScrollForward: Boolean
         get() = offset > 0
     override val canScrollBackward: Boolean
-        get() = offset < totalHeight - viewportHeight
+        get() = offset < totalSize - viewportSize
 
     /**
      * The ScrollableController instance. We keep it as we need to call stopAnimation on it once
@@ -83,6 +90,19 @@ class DataTableState : ScrollableState {
         scrollableState.scroll(scrollPriority, block)
     }
 
+    /**
+     * Instantly jump to the given position in pixels.
+     *
+     * Cancels the currently running scroll, if any, and suspends until the cancellation is
+     * complete.
+     *
+     * @see animateScrollTo for an animated version
+     *
+     * @param value number of pixels to scroll by
+     * @return the amount of scroll consumed
+     */
+    suspend fun scrollTo(value: Int): Float = this.scrollBy((this.offset - value).toFloat())
+
     internal fun onScroll(distance: Float): Float {
         if (distance < 0f && !canScrollForward || distance > 0f && !canScrollBackward) {
             return 0f
@@ -97,7 +117,7 @@ class DataTableState : ScrollableState {
         // we have less than 0.5 pixels
         if (abs(scrollToBeConsumed) > 0.5f) {
             if (distance > 0f) {
-                val remainingSpace = totalHeight - viewportHeight - offset
+                val remainingSpace = totalSize - viewportSize - offset
                 val pixelsScrolled = min(scrollToBeConsumed.roundToInt(), remainingSpace)
                 scrollToBeConsumed -= pixelsScrolled
                 offset += pixelsScrolled
