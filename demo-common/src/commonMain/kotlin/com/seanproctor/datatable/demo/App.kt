@@ -1,15 +1,16 @@
 package com.seanproctor.datatable.demo
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.rememberScrollbarAdapter
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import com.seanproctor.datatable.*
+import com.seanproctor.datatable.DataColumn
+import com.seanproctor.datatable.DataTableScope
+import com.seanproctor.datatable.DataTableState
+import com.seanproctor.datatable.TableColumnWidth
 import com.seanproctor.datatable.material3.DataTable
 import com.seanproctor.datatable.material3.LazyPaginatedDataTable
 import com.seanproctor.datatable.material3.PaginatedDataTable
