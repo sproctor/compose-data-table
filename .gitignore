@@ -85,3 +85,9 @@ app/release/*
 **/bin/
 **/moko-resources-generated.js
 **/.kotlin/*
+
+.fleet
+
+# General
+.DS_Store
+.externalNativeBuild
