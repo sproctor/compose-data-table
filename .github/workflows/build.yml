@@ -30,7 +30,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build with Gradle
-        run: ./gradlew build
+        run: ./gradlew build --stacktrace
 
   publish:
     if: github.repository == 'sproctor/compose-data-table' && github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
