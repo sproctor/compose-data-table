@@ -10,6 +10,7 @@ group = "com.seanproctor"
 version = extra["datatable.version"] as String
 
 kotlin {
+    applyDefaultHierarchyTemplate()
     androidTarget {
         publishLibraryVariants("release")
     }
@@ -17,6 +18,10 @@ kotlin {
     js {
         browser()
     }
+
+    iosX64()
+    iosArm64()
+    iosSimulatorArm64()
 
     sourceSets {
         val commonMain by getting {

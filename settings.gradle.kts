@@ -15,7 +15,7 @@ plugins {
 
 rootProject.name = "compose-data-table"
 
-include(":android", ":desktop", ":demo-common", ":data-table", ":data-table-material3")
+include(":android", ":desktop", ":ios:framework", ":demo-common", ":data-table", ":data-table-material3")
 
 refreshVersions {
     file("build/tmp/refreshVersions").mkdirs()
