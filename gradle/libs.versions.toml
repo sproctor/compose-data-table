@@ -13,7 +13,7 @@ vanniktech-base = { id = "com.vanniktech.maven.publish.base", version.ref = "van
 [versions]
 
 activityCompose = "1.9.3"
-androidGradlePlugin = "8.5.2"
+androidGradlePlugin = "8.7.3"
 compose = "1.7.3"
 junit = "4.13.2"
 kotlin = "2.1.0"
