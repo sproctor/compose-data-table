@@ -23,7 +23,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v4
 
       - name: Build package
-        run: ./gradlew build
+        run: ./gradlew build --stacktrace
 
       - name: Publish release
         run: ./gradlew publishAndReleaseToMavenCentral --no-configuration-cache
