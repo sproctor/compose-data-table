@@ -19,7 +19,6 @@ allprojects {
     repositories {
         google()
         mavenCentral()
-        maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
     }
 
     // Credentials must be added to ~/.gradle/gradle.properties per
