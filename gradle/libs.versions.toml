@@ -11,6 +11,11 @@ kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-multiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 vanniktech-base = { id = "com.vanniktech.maven.publish.base", version.ref = "vanniktech" }
 
+# Plugins defined by this project
+datatable-library = { id = "datatable.library" }
+datatable-publish = { id = "datatable.publish" }
+datatable-android-application = { id = "datatable.android.application" }
+
 [versions]
 
 activityCompose = "1.9.3"
@@ -35,3 +40,4 @@ android-tools-common = { group = "com.android.tools", name = "common", version.r
 androidx-lint-gradle = { group = "androidx.lint", name = "lint-gradle", version.ref = "androidxLintGradle" }
 compose-gradlePlugin = { module = "org.jetbrains.kotlin:compose-compiler-gradle-plugin", version.ref = "kotlin" }
 kotlin-gradlePlugin = { group = "org.jetbrains.kotlin", name = "kotlin-gradle-plugin", version.ref = "kotlin" }
+publish-gradlePlugin = { module = "com.vanniktech.maven.publish:com.vanniktech.maven.publish.gradle.plugin", version.ref = "vanniktech" }

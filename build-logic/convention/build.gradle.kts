@@ -25,6 +25,7 @@ dependencies {
     compileOnly(libs.android.tools.common)
     compileOnly(libs.compose.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
+    compileOnly(libs.publish.gradlePlugin)
     implementation(libs.truth)
     lintChecks(libs.androidx.lint.gradle)
 }
@@ -38,9 +39,17 @@ tasks {
 
 gradlePlugin {
     plugins {
-        register("androidLibrary") {
-            id = libs.plugins.nowinandroid.android.library.asProvider().get().pluginId
-            implementationClass = "AndroidLibraryConventionPlugin"
+        register("datatableAndroidApplication") {
+            id = "datatable.android.application"
+            implementationClass = "AndroidApplicationConventionPlugin"
+        }
+        register("datatablePublish") {
+            id = "datatable.publish"
+            implementationClass = "PublishConventionPlugin"
+        }
+        register("datatableLibrary") {
+            id = "datatable.library"
+            implementationClass = "LibraryConventionPlugin"
         }
     }
 }

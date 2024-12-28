@@ -1,17 +1,10 @@
 plugins {
-    alias(libs.plugins.kotlin.multiplatform)
-    alias(libs.plugins.compose)
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.android.library)
+    alias(libs.plugins.datatable.library)
 }
 
 kotlin {
+
     applyDefaultHierarchyTemplate()
-    androidTarget()
-    jvm()
-    iosX64()
-    iosArm64()
-    iosSimulatorArm64()
 
     sourceSets {
         val commonMain by getting {
@@ -20,19 +13,21 @@ kotlin {
                 implementation(compose.material3)
             }
         }
-    }
 
-    jvmToolchain(11)
+        val skikoMain by creating {
+            dependsOn(commonMain)
+        }
+
+        val jvmMain by getting {
+            dependsOn(skikoMain)
+        }
+
+        val jsMain by getting {
+            dependsOn(skikoMain)
+        }
+    }
 }
 
 android {
     namespace = "com.seanproctor.datatable.demo"
-    compileSdk = extra["sdk.compile"].toString().toInt()
-    defaultConfig {
-        minSdk = extra["sdk.min"].toString().toInt()
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
 }

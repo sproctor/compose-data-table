@@ -1,12 +1,6 @@
 plugins {
-    alias(libs.plugins.compose)
-    alias(libs.plugins.compose.compiler)
-    alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
+    alias(libs.plugins.datatable.android.application)
 }
-
-group = "com.seanproctor"
-version = "1.0-SNAPSHOT"
 
 dependencies {
     implementation(project(":demo-common"))
@@ -15,22 +9,15 @@ dependencies {
     implementation(libs.activity.compose)
 }
 
-kotlin {
-    jvmToolchain(11)
-}
-
 android {
     namespace = "com.seanproctor.datatable.android"
-    compileSdk = extra["sdk.compile"].toString().toInt()
     defaultConfig {
         applicationId = "com.seanproctor.datatable.android"
-        minSdk = extra["sdk.min"].toString().toInt()
-        targetSdk = extra["sdk.compile"].toString().toInt()
         versionCode = 1
-        versionName = "1.0-SNAPSHOT"
+        versionName = "1.0"
     }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
+}
+
+kotlin {
+    jvmToolchain(11)
 }
