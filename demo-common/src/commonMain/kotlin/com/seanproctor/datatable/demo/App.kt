@@ -104,14 +104,14 @@ fun App(onRowClick: (Int) -> Unit) {
         } else {
             LazyPaginatedDataTable(
                 columns = columns,
-                state = rememberPaginatedDataTableState(5),
+                state = rememberPaginatedDataTableState(initialPageSize = 5, initialCount = sortedData.size),
                 sortColumnIndex = sortColumnIndex,
                 sortAscending = sortAscending,
                 modifier = Modifier.fillMaxWidth().padding(16.dp),
                 logger = { println(it) },
                 fetchPage = { state ->
                     val fromIndex = state.pageIndex * state.pageSize
-                    val toIndex = min(fromIndex + state.pageSize, state.count-1)
+                    val toIndex = min(fromIndex + state.pageSize, sortedData.size)
                     val subset = sortedData.subList(fromIndex, toIndex)
                     subset.forEachIndexed { index, rowData ->
                         row {
