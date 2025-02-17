@@ -20,7 +20,7 @@ import kotlin.math.min
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App(onRowClick: (Int) -> Unit) {
-    Surface {
+    Surface(Modifier.fillMaxSize()) {
         Column {
             var selectedIndex by remember { mutableStateOf(0) }
             PrimaryTabRow(
