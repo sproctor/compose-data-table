@@ -42,8 +42,8 @@ fun App(onRowClick: (Int) -> Unit) {
 
         val sortedData = when (sortColumnIndex) {
             null -> rowData
-            0 -> if (sortAscending) rowData.sortedBy { it.text } else rowData.sortedByDescending { it.text }
-            1 -> if (sortAscending) rowData.sortedBy { it.value } else rowData.sortedByDescending { it.value }
+            1 -> if (sortAscending) rowData.sortedBy { it.text } else rowData.sortedByDescending { it.text }
+            2 -> if (sortAscending) rowData.sortedBy { it.value } else rowData.sortedByDescending { it.value }
             else -> throw IllegalStateException("Invalid column index")
         }
 
