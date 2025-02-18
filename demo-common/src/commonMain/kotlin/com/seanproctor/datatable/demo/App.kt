@@ -5,6 +5,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.seanproctor.datatable.DataColumn
@@ -71,6 +72,8 @@ fun App(onRowClick: (Int) -> Unit) {
                 }
             )
 
+            val colorEven = MaterialTheme.colorScheme.surfaceBright
+            val colorOdd = MaterialTheme.colorScheme.surfaceDim
             val scrollState = remember(selectedIndex) { DataTableState() }
             if (selectedIndex == 0) {
                 Box {
@@ -80,18 +83,27 @@ fun App(onRowClick: (Int) -> Unit) {
                         sortColumnIndex = sortColumnIndex,
                         sortAscending = sortAscending,
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        rowBackgroundColor = {
-                            if (it == sortedData.size) {
-                                MaterialTheme.colorScheme.surface
-                            } else if (it % 2 == 0) {
-                                MaterialTheme.colorScheme.surfaceDim
-                            } else {
-                                MaterialTheme.colorScheme.surfaceBright
+//                        headerBackgroundColor = MaterialTheme.colorScheme.surface,
+//                        footerBackgroundColor = MaterialTheme.colorScheme.surface,
+                        footer = {
+                            Box {
+                                Text(
+                                    modifier = Modifier.align(Alignment.CenterEnd),
+                                    text = "Footer",
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    style = MaterialTheme.typography.titleLarge
+                                )
                             }
                         }
 //                    logger = { println(it) }
                     ) {
-                        generateTable(sortedData, onRowClick)
+                        generateTable(
+                            colorEven = colorEven,
+                            colorOdd = colorOdd,
+                            data = sortedData,
+                            onRowClick = onRowClick,
+                        )
                     }
                     LaunchedEffect(scrollState.horizontalScrollState.viewportSize) {
                         println("viewport: ${scrollState.horizontalScrollState.viewportSize}")
@@ -115,7 +127,12 @@ fun App(onRowClick: (Int) -> Unit) {
                     modifier = Modifier.fillMaxWidth().padding(16.dp),
                     logger = { println(it) }
                 ) {
-                    generateTable(sortedData, onRowClick)
+                    generateTable(
+                        colorEven = colorEven,
+                        colorOdd = colorOdd,
+                        data = sortedData,
+                        onRowClick = onRowClick,
+                    )
                 }
             } else {
                 LazyPaginatedDataTable(
@@ -148,9 +165,15 @@ fun App(onRowClick: (Int) -> Unit) {
     }
 }
 
-fun DataTableScope.generateTable(data: List<DemoData>, onRowClick: (Int) -> Unit) {
+fun DataTableScope.generateTable(
+    colorEven: Color,
+    colorOdd: Color,
+    data: List<DemoData>,
+    onRowClick: (Int) -> Unit,
+) {
     data.forEachIndexed { index, rowData ->
         row {
+            backgroundColor = if (index % 2 == 0) colorEven else colorOdd
             onClick = { onRowClick(index) }
             cell { }
             cell {
@@ -159,20 +182,6 @@ fun DataTableScope.generateTable(data: List<DemoData>, onRowClick: (Int) -> Unit
             cell {
                 Text(rowData.value.toString())
             }
-        }
-    }
-    // Footer does not work well with PaginatedDataTable
-    row {
-        isFooter = true
-        cell { }
-        cell { }
-        cell {
-            Text(
-                text = "Footer",
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-                style = MaterialTheme.typography.titleLarge
-            )
         }
     }
 }

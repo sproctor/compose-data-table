@@ -27,7 +27,7 @@ interface TableRowScope {
     var height: Dp
     var isHeader: Boolean
     var isFooter: Boolean
-    var color: Color
+    var backgroundColor: Color
 
     fun cell(content: @Composable () -> Unit)
 }
@@ -55,7 +55,7 @@ internal class TableRowScopeImpl(
     override var height: Dp = Dp.Unspecified
     override var isHeader: Boolean = false
     override var isFooter: Boolean = false
-    override var color: Color = Color.Unspecified
+    override var backgroundColor: Color = Color.Unspecified
     val cells = mutableListOf<@Composable () -> Unit>()
 
     init {

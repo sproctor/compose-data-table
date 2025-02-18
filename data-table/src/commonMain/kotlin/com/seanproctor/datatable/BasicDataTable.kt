@@ -59,7 +59,6 @@ fun BasicDataTable(
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp),
     headerBackgroundColor: Color = Color.Unspecified,
     footerBackgroundColor: Color = Color.Unspecified,
-    rowBackgroundColor: @Composable (Int) -> Color = { Color.Unspecified },
     footer: (@Composable () -> Unit)? = null,
     cellContentProvider: CellContentProvider = DefaultCellContentProvider,
     sortColumnIndex: Int? = null,
@@ -239,7 +238,7 @@ fun BasicDataTable(
                     } else {
                         val rowData = tableScope.tableRows[row - 1]
                         Box(Modifier
-                            .background(rowBackgroundColor(row - 1))
+                            .background(rowData.backgroundColor)
                             .fillMaxSize()
                             .then(if (rowData.onClick != null) Modifier.clickable { rowData.onClick?.invoke() } else Modifier)
                         ) {
@@ -317,14 +316,15 @@ fun BasicDataTable(
                     offset += row.height
                     if (y > -row.height && y < state.verticalScrollState.viewportSize) {
                         row.position(offsetX, y + headerOffset)
-                        row.place(this@SubcomposeLayout, this)
                     }
                 }
             }
             // Place headers and footers last
             measuredRows.forEach { row ->
                 if (row.isHeader || row.isFooter) {
-                    row.place(this@SubcomposeLayout, this)
+                    row.place(this@SubcomposeLayout, this, 0, state.verticalScrollState.viewportSize)
+                } else {
+                    row.place(this@SubcomposeLayout, this, upperBound = headerOffset, lowerBound = footerOffset)
                 }
             }
         }

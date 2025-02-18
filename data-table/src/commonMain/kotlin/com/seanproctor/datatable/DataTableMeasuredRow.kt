@@ -2,9 +2,14 @@ package com.seanproctor.datatable
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.toRect
+import androidx.compose.ui.graphics.Outline
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.SubcomposeMeasureScope
 import androidx.compose.ui.unit.Constraints
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
@@ -54,11 +59,15 @@ class DataTableMeasuredRow(
         return IntOffset(placeableOffsets[index * 2], placeableOffsets[index * 2 + 1])
     }
 
-    override fun place(subcomposeScope: SubcomposeMeasureScope, placementBlock: Placeable.PlacementScope) {
+    override fun place(
+        subcomposeScope: SubcomposeMeasureScope, placementBlock: Placeable.PlacementScope,
+        upperBound: Int,
+        lowerBound: Int,
+    ) {
         with(placementBlock) {
             with(subcomposeScope) {
                 subcompose(key, background).map {
-                    it.measure(
+                    val placeable = it.measure(
                         Constraints(
                             minHeight = height,
                             maxHeight = height,
@@ -66,12 +75,43 @@ class DataTableMeasuredRow(
                             maxWidth = tableWidth,
                         )
                     )
-                        .place(0, backgroundOffset)
+//                        .place(0, backgroundOffset)
+//                    if (upperBound >= backgroundOffset && lowerBound < backgroundOffset) {
+//                        placeable.place(0, backgroundOffset)
+//                    } else {
+                        placeable.placeWithLayer(0, backgroundOffset) {
+                            shape = object : Shape {
+                                override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
+                                    val sizeRect = size.toRect()
+                                    return Outline.Rectangle(
+                                        sizeRect.copy(
+                                            top = maxOf(sizeRect.top, sizeRect.top + upperBound.toFloat() - backgroundOffset),
+                                            bottom = minOf(sizeRect.bottom, sizeRect.bottom - backgroundOffset - height + lowerBound.toFloat()),
+                                        )
+                                    )
+                                }
+                            }
+                            clip = true
+//                        }
+                    }
                 }
             }
             placeables.forEachIndexed { index, placeable ->
                 val offset = getOffset(index)
-                placeable?.place(offset)
+                placeable?.placeWithLayer(offset) {
+                    shape = object : Shape {
+                        override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
+                            val sizeRect = size.toRect()
+                            return Outline.Rectangle(
+                                sizeRect.copy(
+                                    top = maxOf(sizeRect.top, sizeRect.top + upperBound.toFloat() - offset.y),
+                                    bottom = minOf(sizeRect.bottom, sizeRect.bottom - offset.y - placeable.height.toFloat() + lowerBound.toFloat()),
+                                )
+                            )
+                        }
+                    }
+                    clip = true
+                }
             }
         }
     }
@@ -96,7 +136,12 @@ class DataTableMeasuredSimple(
         this.offset = offset
     }
 
-    override fun place(subcomposeScope: SubcomposeMeasureScope, placementBlock: Placeable.PlacementScope) {
+    override fun place(
+        subcomposeScope: SubcomposeMeasureScope,
+        placementBlock: Placeable.PlacementScope,
+        upperBound: Int,
+        lowerBound: Int,
+    ) {
         with(placementBlock) {
             with(subcomposeScope) {
                 subcompose(key, background).map {
@@ -112,7 +157,20 @@ class DataTableMeasuredSimple(
                 }
             }
             placeables.forEach { placeable ->
-                placeable.place(offset)
+                placeable.placeWithLayer(offset) {
+                    shape = object : Shape {
+                        override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
+                            val sizeRect = size.toRect()
+                            return Outline.Rectangle(
+                                sizeRect.copy(
+                                    top = maxOf(sizeRect.top, sizeRect.top + upperBound.toFloat() - offset.y),
+                                    bottom = minOf(sizeRect.bottom, sizeRect.bottom - offset.y - placeable.height.toFloat() + lowerBound.toFloat()),
+                                )
+                            )
+                        }
+                    }
+                    clip = true
+                }
             }
         }
     }
@@ -129,5 +187,10 @@ interface DataTableMeasuredElement {
         position(IntOffset(x, y))
     }
 
-    fun place(subcomposeScope: SubcomposeMeasureScope, placementBlock: Placeable.PlacementScope)
+    fun place(
+        subcomposeScope: SubcomposeMeasureScope,
+        placementBlock: Placeable.PlacementScope,
+        upperBound: Int,
+        lowerBound: Int,
+    )
 }
