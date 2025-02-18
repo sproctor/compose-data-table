@@ -84,7 +84,7 @@ fun BasicDataTable(
                     }
                 ) {
                     // Must have exactly 1 Composable per cell
-                    Box {
+                    Box(Modifier.padding(contentPadding)) {
                         columnDefinition.header()
                     }
                 }
