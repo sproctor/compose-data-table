@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 
+@Target(AnnotationTarget.CLASS, AnnotationTarget.TYPE)
 @DslMarker
 annotation class DataTableScopeMarker
 
@@ -17,7 +18,7 @@ interface DataTableScope {
      * Creates a new row in the [BasicDataTable] with the specified content.
      */
     fun row(
-        content: TableRowScope.() -> Unit
+        content: @DataTableScopeMarker TableRowScope.() -> Unit
     )
 }
 
@@ -29,7 +30,12 @@ interface TableRowScope {
     var isFooter: Boolean
     var backgroundColor: Color
 
-    fun cell(content: @Composable () -> Unit)
+    fun cell(content: @DataTableScopeMarker @Composable TableCellScope.() -> Unit)
+}
+
+@DataTableScopeMarker
+interface TableCellScope {
+    val columnIndex: Int
 }
 
 internal class DataTableScopeImpl(
@@ -56,13 +62,17 @@ internal class TableRowScopeImpl(
     override var isHeader: Boolean = false
     override var isFooter: Boolean = false
     override var backgroundColor: Color = Color.Unspecified
-    val cells = mutableListOf<@Composable () -> Unit>()
+    val cells = mutableListOf<@Composable TableCellScope.() -> Unit>()
 
     init {
         apply(content)
     }
 
-    override fun cell(content: @Composable () -> Unit) {
+    override fun cell(content: @Composable TableCellScope.() -> Unit) {
         cells += content
     }
 }
+
+internal class TableCellScopeImpl(
+    override val columnIndex: Int,
+) : TableCellScope
