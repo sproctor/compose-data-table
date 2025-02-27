@@ -31,6 +31,9 @@ import com.seanproctor.datatable.material3.DataTable
 import com.seanproctor.datatable.material3.LazyPaginatedDataTable
 import com.seanproctor.datatable.material3.PaginatedDataTable
 import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
+import io.github.oikvpqya.compose.fastscroller.HorizontalScrollbar
+import io.github.oikvpqya.compose.fastscroller.VerticalScrollbar
+import io.github.oikvpqya.compose.fastscroller.material3.defaultMaterialScrollbarStyle
 import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -98,8 +101,6 @@ fun App(onRowClick: (Int) -> Unit) {
                         sortColumnIndex = sortColumnIndex,
                         sortAscending = sortAscending,
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
-//                        headerBackgroundColor = MaterialTheme.colorScheme.surface,
-//                        footerBackgroundColor = MaterialTheme.colorScheme.surface,
                         footer = {
                             Box {
                                 Text(
@@ -111,7 +112,6 @@ fun App(onRowClick: (Int) -> Unit) {
                                 )
                             }
                         }
-//                    logger = { println(it) }
                     ) {
                         generateTable(
                             colorEven = colorEven,
@@ -120,17 +120,15 @@ fun App(onRowClick: (Int) -> Unit) {
                             onRowClick = onRowClick,
                         )
                     }
-                    LaunchedEffect(scrollState.horizontalScrollState.viewportSize) {
-                        println("viewport: ${scrollState.horizontalScrollState.viewportSize}")
-                        println("total size: ${scrollState.horizontalScrollState.totalSize}")
-                    }
                     VerticalScrollbar(
-                        scrollState.verticalScrollState,
-                        Modifier.fillMaxHeight().align(Alignment.CenterEnd)
+                        adapter = rememberScrollbarAdapter(scrollState.verticalScrollState),
+                        style = defaultMaterialScrollbarStyle(),
+                        modifier = Modifier.fillMaxHeight().align(Alignment.CenterEnd),
                     )
                     HorizontalScrollbar(
-                        scrollState.horizontalScrollState,
-                        Modifier.fillMaxWidth().align(Alignment.BottomCenter)
+                        adapter = rememberScrollbarAdapter(scrollState.horizontalScrollState),
+                        style = defaultMaterialScrollbarStyle(),
+                        modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
                     )
                 }
             } else if (selectedIndex == 1) {
@@ -188,7 +186,7 @@ fun DataTableScope.generateTable(
 ) {
     data.forEachIndexed { index, rowData ->
         row {
-            backgroundColor = if (index % 2 == 0) colorEven else colorOdd
+//            backgroundColor = if (index % 2 == 0) colorEven else colorOdd
             onClick = { onRowClick(index) }
             cell { }
             cell {
