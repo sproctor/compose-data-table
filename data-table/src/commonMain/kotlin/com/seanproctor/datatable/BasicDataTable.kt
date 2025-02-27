@@ -237,10 +237,11 @@ fun BasicDataTable(
                         }
                     } else {
                         val rowData = tableScope.tableRows[row - 1]
-                        Box(Modifier
-                            .background(rowData.backgroundColor)
-                            .fillMaxSize()
-                            .then(if (rowData.onClick != null) Modifier.clickable { rowData.onClick?.invoke() } else Modifier)
+                        Box(
+                            Modifier
+                                .background(rowData.backgroundColor)
+                                .fillMaxSize()
+                                .then(if (rowData.onClick != null) Modifier.clickable { rowData.onClick?.invoke() } else Modifier)
                         ) {
                             if (row < rowCount - 1) {
                                 Box(Modifier.align(Alignment.BottomStart)) {
@@ -304,27 +305,27 @@ fun BasicDataTable(
             var headerOffset = 0
             var footerOffset = state.verticalScrollState.viewportSize
             val offsetX = -state.horizontalScrollState.offset
+            // Place headers and footers first to get their measurements
             measuredRows.forEach { row ->
                 if (row.isHeader) {
                     row.position(offsetX, headerOffset)
                     headerOffset += row.height
+                    row.place(this@SubcomposeLayout, this, 0, state.verticalScrollState.viewportSize)
                 } else if (row.isFooter) {
                     footerOffset -= row.height
                     row.position(offsetX, footerOffset)
-                } else {
-                    val y = offset - state.verticalScrollState.offset
-                    offset += row.height
-                    if (y > -row.height && y < state.verticalScrollState.viewportSize) {
-                        row.position(offsetX, y + headerOffset)
-                    }
+                    row.place(this@SubcomposeLayout, this, 0, state.verticalScrollState.viewportSize)
                 }
             }
             // Place headers and footers last
             measuredRows.forEach { row ->
-                if (row.isHeader || row.isFooter) {
-                    row.place(this@SubcomposeLayout, this, 0, state.verticalScrollState.viewportSize)
-                } else {
-                    row.place(this@SubcomposeLayout, this, upperBound = headerOffset, lowerBound = footerOffset)
+                if (!row.isHeader && !row.isFooter) {
+                    val y = offset - state.verticalScrollState.offset
+                    offset += row.height
+                    if (y > -row.height && y < state.verticalScrollState.viewportSize) {
+                        row.position(offsetX, y + headerOffset)
+                        row.place(this@SubcomposeLayout, this, upperBound = headerOffset, lowerBound = footerOffset)
+                    }
                 }
             }
         }

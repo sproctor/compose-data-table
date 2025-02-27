@@ -8,11 +8,7 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.SubcomposeMeasureScope
-import androidx.compose.ui.unit.Constraints
-import androidx.compose.ui.unit.Density
-import androidx.compose.ui.unit.IntOffset
-import androidx.compose.ui.unit.IntSize
-import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.*
 
 class DataTableMeasuredRow(
     val placeables: Array<Placeable?>,
@@ -59,7 +55,8 @@ class DataTableMeasuredRow(
     }
 
     override fun place(
-        subcomposeScope: SubcomposeMeasureScope, placementBlock: Placeable.PlacementScope,
+        subcomposeScope: SubcomposeMeasureScope,
+        placementBlock: Placeable.PlacementScope,
         upperBound: Int,
         lowerBound: Int,
     ) {
@@ -74,21 +71,20 @@ class DataTableMeasuredRow(
                             maxWidth = tableWidth,
                         )
                     )
-                        .place(0, backgroundOffset)
-//                        .placeWithLayer(0, backgroundOffset) {
-//                            shape = object : Shape {
-//                                override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
-//                                    val sizeRect = size.toRect()
-//                                    return Outline.Rectangle(
-//                                        sizeRect.copy(
-//                                            top = maxOf(sizeRect.top, sizeRect.top + upperBound.toFloat() - backgroundOffset),
-//                                            bottom = minOf(sizeRect.bottom, sizeRect.bottom - backgroundOffset - height + lowerBound.toFloat()),
-//                                        )
-//                                    )
-//                                }
-//                            }
-//                            clip = true
-//                        }
+                        .placeWithLayer(0, backgroundOffset) {
+                            shape = object : Shape {
+                                override fun createOutline(size: Size, layoutDirection: LayoutDirection, density: Density): Outline {
+                                    val sizeRect = size.toRect()
+                                    return Outline.Rectangle(
+                                        sizeRect.copy(
+                                            top = maxOf(sizeRect.top, sizeRect.top + upperBound.toFloat() - backgroundOffset),
+                                            bottom = minOf(sizeRect.bottom, sizeRect.bottom - backgroundOffset - height + lowerBound.toFloat()),
+                                        )
+                                    )
+                                }
+                            }
+                            clip = true
+                        }
                 }
             }
             placeables.forEachIndexed { index, placeable ->
@@ -147,7 +143,7 @@ class DataTableMeasuredSimple(
         with(placementBlock) {
             with(subcomposeScope) {
                 subcompose(key, background).map {
-                    it.measure(
+                    val placeable = it.measure(
                         Constraints(
                             minHeight = height,
                             maxHeight = height,
@@ -155,32 +151,51 @@ class DataTableMeasuredSimple(
                             maxWidth = tableWidth,
                         )
                     )
-                        .place(offset)
+                    placeable.placeWithLayer(offset) {
+                        shape = object : Shape {
+                            override fun createOutline(
+                                size: Size,
+                                layoutDirection: LayoutDirection,
+                                density: Density
+                            ): Outline {
+                                val sizeRect = size.toRect()
+                                return Outline.Rectangle(
+                                    sizeRect.copy(
+                                        top = maxOf(sizeRect.top, sizeRect.top + upperBound.toFloat() - offset.y),
+                                        bottom = minOf(
+                                            sizeRect.bottom,
+                                            sizeRect.bottom - offset.y - placeable.height.toFloat() + lowerBound.toFloat()
+                                        ),
+                                    )
+                                )
+                            }
+                        }
+                        clip = true
+                    }
                 }
             }
             placeables.forEach { placeable ->
-                placeable.place(offset)
-//                placeable.placeWithLayer(offset) {
-//                    shape = object : Shape {
-//                        override fun createOutline(
-//                            size: Size,
-//                            layoutDirection: LayoutDirection,
-//                            density: Density
-//                        ): Outline {
-//                            val sizeRect = size.toRect()
-//                            return Outline.Rectangle(
-//                                sizeRect.copy(
-//                                    top = maxOf(sizeRect.top, sizeRect.top + upperBound.toFloat() - offset.y),
-//                                    bottom = minOf(
-//                                        sizeRect.bottom,
-//                                        sizeRect.bottom - offset.y - placeable.height.toFloat() + lowerBound.toFloat()
-//                                    ),
-//                                )
-//                            )
-//                        }
-//                    }
-//                    clip = true
-//                }
+                placeable.placeWithLayer(offset) {
+                    shape = object : Shape {
+                        override fun createOutline(
+                            size: Size,
+                            layoutDirection: LayoutDirection,
+                            density: Density
+                        ): Outline {
+                            val sizeRect = size.toRect()
+                            return Outline.Rectangle(
+                                sizeRect.copy(
+                                    top = maxOf(sizeRect.top, sizeRect.top + upperBound.toFloat() - offset.y),
+                                    bottom = minOf(
+                                        sizeRect.bottom,
+                                        sizeRect.bottom - offset.y - placeable.height.toFloat() + lowerBound.toFloat()
+                                    ),
+                                )
+                            )
+                        }
+                    }
+                    clip = true
+                }
             }
         }
     }
