@@ -186,7 +186,7 @@ fun DataTableScope.generateTable(
 ) {
     data.forEachIndexed { index, rowData ->
         row {
-            backgroundColor = if (index % 2 == 0) colorEven else colorOdd
+//            backgroundColor = if (index % 2 == 0) colorEven else colorOdd
             onClick = { onRowClick(index) }
             cell { }
             cell {
