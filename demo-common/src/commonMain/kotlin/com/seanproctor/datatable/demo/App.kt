@@ -31,6 +31,9 @@ import com.seanproctor.datatable.material3.DataTable
 import com.seanproctor.datatable.material3.LazyPaginatedDataTable
 import com.seanproctor.datatable.material3.PaginatedDataTable
 import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
+import io.github.oikvpqya.compose.fastscroller.HorizontalScrollbar
+import io.github.oikvpqya.compose.fastscroller.VerticalScrollbar
+import io.github.oikvpqya.compose.fastscroller.material3.defaultMaterialScrollbarStyle
 import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -125,12 +128,14 @@ fun App(onRowClick: (Int) -> Unit) {
                         println("total size: ${scrollState.horizontalScrollState.totalSize}")
                     }
                     VerticalScrollbar(
-                        scrollState.verticalScrollState,
-                        Modifier.fillMaxHeight().align(Alignment.CenterEnd)
+                        adapter = rememberScrollbarAdapter(scrollState.verticalScrollState),
+                        style = defaultMaterialScrollbarStyle(),
+                        modifier = Modifier.fillMaxHeight().align(Alignment.CenterEnd),
                     )
                     HorizontalScrollbar(
-                        scrollState.horizontalScrollState,
-                        Modifier.fillMaxWidth().align(Alignment.BottomCenter)
+                        adapter = rememberScrollbarAdapter(scrollState.horizontalScrollState),
+                        style = defaultMaterialScrollbarStyle(),
+                        modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
                     )
                 }
             } else if (selectedIndex == 1) {

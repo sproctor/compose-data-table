@@ -44,9 +44,7 @@ fun BasicPaginatedDataTable(
     ) {
         val start = state.pageIndex * state.pageSize
         val scope = PaginatedRowScope(start, start + state.pageSize, this)
-        with(scope) {
-            content()
-        }
+        content(scope)
         if (state.count != scope.index) {
             state.count = scope.index
         }
