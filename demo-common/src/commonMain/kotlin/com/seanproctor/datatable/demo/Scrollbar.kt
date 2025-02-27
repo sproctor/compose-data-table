@@ -2,7 +2,6 @@ package com.seanproctor.datatable.demo
 
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.Modifier
 import com.seanproctor.datatable.DataTableScrollState
 import io.github.oikvpqya.compose.fastscroller.ScrollbarAdapter
 import kotlin.math.roundToInt
@@ -12,7 +11,7 @@ fun rememberScrollbarAdapter(scrollState: DataTableScrollState): ScrollbarAdapte
     return remember(scrollState) { DataTableScrollbarAdapter(scrollState) }
 }
 
-internal class DataTableScrollbarAdapter(
+private class DataTableScrollbarAdapter(
     private val scrollState: DataTableScrollState
 ) : ScrollbarAdapter {
     override val scrollOffset: Double get() = scrollState.offset.toDouble()

@@ -101,8 +101,6 @@ fun App(onRowClick: (Int) -> Unit) {
                         sortColumnIndex = sortColumnIndex,
                         sortAscending = sortAscending,
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
-//                        headerBackgroundColor = MaterialTheme.colorScheme.surface,
-//                        footerBackgroundColor = MaterialTheme.colorScheme.surface,
                         footer = {
                             Box {
                                 Text(
@@ -114,7 +112,6 @@ fun App(onRowClick: (Int) -> Unit) {
                                 )
                             }
                         }
-//                    logger = { println(it) }
                     ) {
                         generateTable(
                             colorEven = colorEven,
@@ -122,10 +119,6 @@ fun App(onRowClick: (Int) -> Unit) {
                             data = sortedData,
                             onRowClick = onRowClick,
                         )
-                    }
-                    LaunchedEffect(scrollState.horizontalScrollState.viewportSize) {
-                        println("viewport: ${scrollState.horizontalScrollState.viewportSize}")
-                        println("total size: ${scrollState.horizontalScrollState.totalSize}")
                     }
                     VerticalScrollbar(
                         adapter = rememberScrollbarAdapter(scrollState.verticalScrollState),
