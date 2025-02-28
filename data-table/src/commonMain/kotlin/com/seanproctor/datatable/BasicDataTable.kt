@@ -183,14 +183,22 @@ fun BasicDataTable(
                 constraints.minWidth,
                 minTableWidth
             )
-        val remainingSpace = availableSpace - neededColumnWidth
+        var remainingSpace = availableSpace - neededColumnWidth
 
         // Grow flexible columns to fill available horizontal space.
         if (totalFlex > 0 && remainingSpace > 0) {
             for (column in 0 until columnCount) {
                 val spec = columns[column].width
                 if (spec.flexValue > 0) {
-                    columnWidths[column] += (remainingSpace * (spec.flexValue / totalFlex)).roundToInt()
+                    val roundedSpace = (remainingSpace * (spec.flexValue / totalFlex)).roundToInt()
+                    totalFlex -= spec.flexValue
+                    if (totalFlex > 0) {
+                        columnWidths[column] += roundedSpace
+                        remainingSpace -= roundedSpace
+                    } else {
+                        columnWidths[column] += remainingSpace
+                        remainingSpace = 0
+                    }
                 }
             }
         }
