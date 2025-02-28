@@ -70,7 +70,7 @@ fun App(onRowClick: (Int) -> Unit) {
             val columns = listOf(
                 DataColumn(width = TableColumnWidth.Wrap) { },
                 DataColumn(
-                    width = TableColumnWidth.Wrap,
+                    //width = TableColumnWidth.Wrap,
                     onSort = { index, ascending ->
                         sortColumnIndex = index
                         sortAscending = ascending
@@ -186,7 +186,7 @@ fun DataTableScope.generateTable(
 ) {
     data.forEachIndexed { index, rowData ->
         row {
-//            backgroundColor = if (index % 2 == 0) colorEven else colorOdd
+            backgroundColor = if (index % 2 == 0) colorEven else colorOdd
             onClick = { onRowClick(index) }
             cell { }
             cell {
