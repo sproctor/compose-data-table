@@ -3,6 +3,7 @@ package com.seanproctor.datatable
 import com.android.build.api.dsl.CommonExtension
 import org.gradle.api.JavaVersion
 import org.gradle.api.Project
+import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
 
 internal fun Project.configureKotlinAndroid(
@@ -29,6 +30,7 @@ internal fun Project.configureKotlinAndroid(
 /**
  * Configure base Kotlin options for all targets
  */
+@OptIn(ExperimentalWasmDsl::class)
 internal fun Project.configureKotlinMultiplatform(
     extension: KotlinMultiplatformExtension
 ) {
@@ -41,6 +43,10 @@ internal fun Project.configureKotlinMultiplatform(
         }
         jvm()
         js {
+            browser()
+            useEsModules()
+        }
+        wasmJs {
             browser()
         }
         iosX64()

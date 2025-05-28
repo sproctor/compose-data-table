@@ -22,12 +22,10 @@ kotlin {
 
 dependencies {
     compileOnly(libs.android.gradlePlugin)
-    compileOnly(libs.android.tools.common)
     compileOnly(libs.compose.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.publish.gradlePlugin)
     implementation(libs.truth)
-    lintChecks(libs.androidx.lint.gradle)
 }
 
 tasks {
