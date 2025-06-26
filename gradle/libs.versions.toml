@@ -19,12 +19,12 @@ datatable-android-application = { id = "datatable.android.application" }
 [versions]
 
 activityCompose = "1.10.1"
-androidGradlePlugin = "8.7.3"
-compose = "1.8.1"
+androidGradlePlugin = "8.10.1"
+compose = "1.8.2"
 fastscroller = "0.3.2"
-kotlin = "2.1.21"
+kotlin = "2.2.0"
 truth = "1.4.4"
-vanniktech = "0.32.0"
+vanniktech = "0.33.0"
 
 [libraries]
 
