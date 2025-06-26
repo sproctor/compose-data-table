@@ -85,6 +85,7 @@ app/release/*
 **/bin/
 **/moko-resources-generated.js
 **/.kotlin/*
+.idea/graphql-settings.xml
 
 .fleet
 
