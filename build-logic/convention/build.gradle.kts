@@ -37,10 +37,6 @@ tasks {
 
 gradlePlugin {
     plugins {
-        register("datatableAndroidApplication") {
-            id = "datatable.android.application"
-            implementationClass = "AndroidApplicationConventionPlugin"
-        }
         register("datatablePublish") {
             id = "datatable.publish"
             implementationClass = "PublishConventionPlugin"

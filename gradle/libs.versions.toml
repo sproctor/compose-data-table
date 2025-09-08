@@ -3,7 +3,7 @@
 [plugins]
 
 android-application = { id = "com.android.application", version.ref = "androidGradlePlugin" }
-android-library = { id = "com.android.library", version.ref = "androidGradlePlugin" }
+android-kotlin-multiplatform-library = { id = "com.android.kotlin.multiplatform.library", version.ref = "androidGradlePlugin" }
 android-lint = { id = "com.android.lint", version.ref = "androidGradlePlugin" }
 compose = { id = "org.jetbrains.compose", version.ref = "compose" }
 compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
@@ -14,7 +14,6 @@ vanniktech-base = { id = "com.vanniktech.maven.publish.base", version.ref = "van
 # Plugins defined by this project
 datatable-library = { id = "datatable.library" }
 datatable-publish = { id = "datatable.publish" }
-datatable-android-application = { id = "datatable.android.application" }
 
 [versions]
 
@@ -22,9 +21,9 @@ activityCompose = "1.10.1"
 androidGradlePlugin = "8.10.1"
 compose = "1.8.2"
 fastscroller = "0.3.2"
-kotlin = "2.2.0"
+kotlin = "2.2.10"
 truth = "1.4.4"
-vanniktech = "0.33.0"
+vanniktech = "0.34.0"
 
 [libraries]
 

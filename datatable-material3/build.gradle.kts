@@ -5,16 +5,12 @@ plugins {
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        commonMain {
             dependencies {
-                api(project(":data-table"))
+                api(project(":datatable"))
                 implementation(compose.material3)
                 implementation(compose.materialIconsExtended)
             }
         }
     }
-}
-
-android {
-    namespace = "com.seanproctor.datatable.material3"
 }
