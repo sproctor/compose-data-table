@@ -25,7 +25,6 @@ dependencies {
     compileOnly(libs.compose.gradlePlugin)
     compileOnly(libs.kotlin.gradlePlugin)
     compileOnly(libs.publish.gradlePlugin)
-    implementation(libs.truth)
 }
 
 tasks {

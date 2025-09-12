@@ -7,7 +7,6 @@ plugins {
 
 dependencies {
     implementation(project(":demo-common"))
-    implementation(compose.material)
     implementation(compose.uiTooling)
     implementation(libs.activity.compose)
 }

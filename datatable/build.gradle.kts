@@ -4,9 +4,6 @@ plugins {
 }
 
 kotlin {
-//    androidLibrary {
-//        namespace = "com.seanproctor.datatable"
-//    }
     sourceSets {
         commonMain  {
             dependencies {

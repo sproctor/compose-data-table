@@ -29,7 +29,6 @@ internal fun Project.configureKotlinMultiplatform(
         wasmJs {
             browser()
         }
-        iosX64()
         iosArm64()
         iosSimulatorArm64()
     }
