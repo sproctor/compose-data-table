@@ -15,13 +15,13 @@ Add the dependency to your gradle build file:
 Non-material version:
 
 ```kotlin
-implementation("com.seanproctor:data-table:<VERSION>")
+implementation("com.seanproctor:datatable:<VERSION>")
 ```
 
 Material 3:
 
 ```kotlin
-implementation("com.seanproctor:data-table-material3:<VERSION>")
+implementation("com.seanproctor:datatable-material3:<VERSION>")
 ```
 
 Draw a table
