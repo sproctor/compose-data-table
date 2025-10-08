@@ -19,7 +19,7 @@ datatable-publish = { id = "datatable.publish" }
 
 activityCompose = "1.11.0"
 androidGradlePlugin = "8.11.2"
-compose = "1.8.2"
+compose = "1.9.0"
 fastscroller = "0.3.2"
 kotlin = "2.2.20"
 vanniktech = "0.34.0"
