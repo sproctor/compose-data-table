@@ -92,25 +92,54 @@ fun App(onRowClick: (Int) -> Unit) {
             val colorEven = MaterialTheme.colorScheme.surfaceBright
             val colorOdd = MaterialTheme.colorScheme.surfaceDim
             val scrollState = remember(selectedIndex) { DataTableState() }
-            if (selectedIndex == 0) {
-                Box {
-                    DataTable(
+            when (selectedIndex) {
+                0 -> {
+                    Box {
+                        DataTable(
+                            columns = columns,
+                            state = scrollState,
+                            sortColumnIndex = sortColumnIndex,
+                            sortAscending = sortAscending,
+                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            footer = {
+                                Box {
+                                    Text(
+                                        modifier = Modifier.align(Alignment.CenterEnd),
+                                        text = "Footer",
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis,
+                                        style = MaterialTheme.typography.titleLarge
+                                    )
+                                }
+                            }
+                        ) {
+                            generateTable(
+                                colorEven = colorEven,
+                                colorOdd = colorOdd,
+                                data = sortedData,
+                                onRowClick = onRowClick,
+                            )
+                        }
+                        VerticalScrollbar(
+                            adapter = rememberScrollbarAdapter(scrollState.verticalScrollState),
+                            style = defaultMaterialScrollbarStyle(),
+                            modifier = Modifier.fillMaxHeight().align(Alignment.CenterEnd),
+                        )
+                        HorizontalScrollbar(
+                            adapter = rememberScrollbarAdapter(scrollState.horizontalScrollState),
+                            style = defaultMaterialScrollbarStyle(),
+                            modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
+                        )
+                    }
+                }
+                1 -> {
+                    PaginatedDataTable(
                         columns = columns,
-                        state = scrollState,
+                        state = rememberPaginatedDataTableState(5),
                         sortColumnIndex = sortColumnIndex,
                         sortAscending = sortAscending,
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        footer = {
-                            Box {
-                                Text(
-                                    modifier = Modifier.align(Alignment.CenterEnd),
-                                    text = "Footer",
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    style = MaterialTheme.typography.titleLarge
-                                )
-                            }
-                        }
+                        logger = { println(it) }
                     ) {
                         generateTable(
                             colorEven = colorEven,
@@ -119,65 +148,40 @@ fun App(onRowClick: (Int) -> Unit) {
                             onRowClick = onRowClick,
                         )
                     }
-                    VerticalScrollbar(
-                        adapter = rememberScrollbarAdapter(scrollState.verticalScrollState),
-                        style = defaultMaterialScrollbarStyle(),
-                        modifier = Modifier.fillMaxHeight().align(Alignment.CenterEnd),
-                    )
-                    HorizontalScrollbar(
-                        adapter = rememberScrollbarAdapter(scrollState.horizontalScrollState),
-                        style = defaultMaterialScrollbarStyle(),
-                        modifier = Modifier.fillMaxWidth().align(Alignment.BottomCenter)
-                    )
                 }
-            } else if (selectedIndex == 1) {
-                PaginatedDataTable(
-                    columns = columns,
-                    state = rememberPaginatedDataTableState(5),
-                    sortColumnIndex = sortColumnIndex,
-                    sortAscending = sortAscending,
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    logger = { println(it) }
-                ) {
-                    generateTable(
-                        colorEven = colorEven,
-                        colorOdd = colorOdd,
-                        data = sortedData,
-                        onRowClick = onRowClick,
-                    )
-                }
-            } else {
-                LazyPaginatedDataTable(
-                    columns = columns,
-                    state = rememberPaginatedDataTableState(initialPageSize = 5, initialCount = sortedData.size),
-                    sortColumnIndex = sortColumnIndex,
-                    sortAscending = sortAscending,
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    logger = { println(it) },
-                    fetchPage = { state ->
-                        val fromIndex = state.pageIndex * state.pageSize
-                        val toIndex = min(fromIndex + state.pageSize, sortedData.size)
-                        val subset = sortedData.subList(fromIndex, toIndex)
-                        subset.forEachIndexed { index, rowData ->
-                            row {
-                                onClick = { onRowClick(fromIndex + index) }
-                                cell { }
-                                cell {
-                                    Text(rowData.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                }
-                                cell {
-                                    Text(rowData.value.toString())
+                else -> {
+                    LazyPaginatedDataTable(
+                        columns = columns,
+                        state = rememberPaginatedDataTableState(initialPageSize = 5, initialCount = sortedData.size),
+                        sortColumnIndex = sortColumnIndex,
+                        sortAscending = sortAscending,
+                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        logger = { println(it) },
+                        fetchPage = { state ->
+                            val fromIndex = state.pageIndex * state.pageSize
+                            val toIndex = min(fromIndex + state.pageSize, sortedData.size)
+                            val subset = sortedData.subList(fromIndex, toIndex)
+                            subset.forEachIndexed { index, rowData ->
+                                row {
+                                    onClick = { onRowClick(fromIndex + index) }
+                                    cell { }
+                                    cell {
+                                        Text(rowData.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    }
+                                    cell {
+                                        Text(rowData.value.toString())
+                                    }
                                 }
                             }
                         }
-                    }
-                )
+                    )
+                }
             }
         }
     }
 }
 
-fun DataTableScope.generateTable(
+private fun DataTableScope.generateTable(
     colorEven: Color,
     colorOdd: Color,
     data: List<DemoData>,
