@@ -2,14 +2,15 @@ package com.seanproctor.datatable.material3
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDownward
-import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.unit.dp
 import com.seanproctor.datatable.CellContentProvider
+import com.seanproctor.datatable_material3.generated.resources.Res
+import com.seanproctor.datatable_material3.generated.resources.arrow_downward
+import com.seanproctor.datatable_material3.generated.resources.arrow_upward
+import org.jetbrains.compose.resources.painterResource
 
 object Material3CellContentProvider : CellContentProvider {
     @Composable
@@ -40,9 +41,9 @@ object Material3CellContentProvider : CellContentProvider {
                             onClick = onClick
                         ) {
                             if (sortAscending) {
-                                Icon(Icons.Default.ArrowUpward, contentDescription = null)
+                                Icon(painterResource(Res.drawable.arrow_upward), contentDescription = null)
                             } else {
-                                Icon(Icons.Default.ArrowDownward, contentDescription = null)
+                                Icon(painterResource(Res.drawable.arrow_downward), contentDescription = null)
                             }
                         }
                     }

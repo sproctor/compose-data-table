@@ -3,7 +3,6 @@ import org.gradle.api.Project
 import org.gradle.api.publish.PublishingExtension
 import org.gradle.kotlin.dsl.configure
 import com.vanniktech.maven.publish.MavenPublishBaseExtension
-import com.vanniktech.maven.publish.SonatypeHost
 import com.vanniktech.maven.publish.KotlinMultiplatform
 import com.vanniktech.maven.publish.JavadocJar.Empty
 
@@ -26,7 +25,7 @@ class PublishConventionPlugin : Plugin<Project> {
                     }
                 }
                 configure<MavenPublishBaseExtension> {
-                    publishToMavenCentral(SonatypeHost.S01)
+                    publishToMavenCentral(automaticRelease = true)
                     signAllPublications()
                     pom {
                         description.set("A Material Design data table implementation for Compose Multiplatform.")

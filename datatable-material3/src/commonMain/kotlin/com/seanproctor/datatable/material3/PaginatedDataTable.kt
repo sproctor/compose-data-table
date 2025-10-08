@@ -6,11 +6,6 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.LastPage
-import androidx.compose.material.icons.filled.ChevronLeft
-import androidx.compose.material.icons.filled.ChevronRight
-import androidx.compose.material.icons.filled.FirstPage
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -26,6 +21,12 @@ import com.seanproctor.datatable.DataColumn
 import com.seanproctor.datatable.DataTableScope
 import com.seanproctor.datatable.paging.BasicPaginatedDataTable
 import com.seanproctor.datatable.paging.PaginatedDataTableState
+import com.seanproctor.datatable_material3.generated.resources.Res
+import com.seanproctor.datatable_material3.generated.resources.chevron_left
+import com.seanproctor.datatable_material3.generated.resources.chevron_right
+import com.seanproctor.datatable_material3.generated.resources.first_page
+import com.seanproctor.datatable_material3.generated.resources.last_page
+import org.jetbrains.compose.resources.painterResource
 import kotlin.math.min
 
 @Composable
@@ -39,7 +40,6 @@ fun PaginatedDataTable(
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp),
     headerBackgroundColor: Color = MaterialTheme.colorScheme.surface,
     footerBackgroundColor: Color = MaterialTheme.colorScheme.surface,
-    rowBackgroundColor: @Composable (Int) -> Color = { MaterialTheme.colorScheme.surface },
     sortColumnIndex: Int? = null,
     sortAscending: Boolean = true,
     logger: ((String) -> Unit)? = null,
@@ -69,25 +69,37 @@ fun PaginatedDataTable(
                     onClick = { state.pageIndex = 0 },
                     enabled = state.pageIndex > 0,
                 ) {
-                    Icon(Icons.Default.FirstPage, "First")
+                    Icon(
+                        painter = painterResource(Res.drawable.first_page),
+                        contentDescription = "First page",
+                    )
                 }
                 IconButton(
                     onClick = { state.pageIndex-- },
                     enabled = state.pageIndex > 0,
                 ) {
-                    Icon(Icons.Default.ChevronLeft, "Previous")
+                    Icon(
+                        painter = painterResource(Res.drawable.chevron_left),
+                        contentDescription = "Previous page",
+                    )
                 }
                 IconButton(
                     onClick = { state.pageIndex++ },
                     enabled = state.pageIndex < pageCount - 1
                 ) {
-                    Icon(Icons.Default.ChevronRight, "Next")
+                    Icon(
+                        painter = painterResource(Res.drawable.chevron_right),
+                        contentDescription = "Next page",
+                    )
                 }
                 IconButton(
                     onClick = { state.pageIndex = pageCount - 1 },
                     enabled = state.pageIndex < pageCount - 1
                 ) {
-                    Icon(Icons.AutoMirrored.Filled.LastPage, "Last")
+                    Icon(
+                        painter = painterResource(Res.drawable.last_page),
+                        contentDescription = "Last page",
+                    )
                 }
             }
         },

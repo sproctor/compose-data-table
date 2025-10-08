@@ -5,15 +5,11 @@ plugins {
 
 kotlin {
     sourceSets {
-        val commonMain by getting {
+        commonMain  {
             dependencies {
                 implementation(compose.runtime)
                 implementation(compose.foundation)
             }
         }
     }
-}
-
-android {
-    namespace = "com.seanproctor.datatable"
 }

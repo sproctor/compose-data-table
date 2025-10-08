@@ -16,13 +16,20 @@ dependencyResolutionManagement {
 
 plugins {
     // See https://jmfayard.github.io/refreshVersions
-    id("de.fayard.refreshVersions") version "0.60.5"
+    id("de.fayard.refreshVersions") version "0.60.6"
     id("org.gradle.toolchains.foojay-resolver-convention") version "1.0.0"
 }
 
 rootProject.name = "compose-data-table"
 
-include(":android", ":desktop", ":ios:framework", ":demo-common", ":data-table", ":data-table-material3")
+include(":datatable")
+include(":datatable-material3")
+
+// Demo apps
+include(":demo-common")
+include(":android")
+include(":desktop")
+include(":ios:framework")
 
 refreshVersions {
     file("build/tmp/refreshVersions").mkdirs()

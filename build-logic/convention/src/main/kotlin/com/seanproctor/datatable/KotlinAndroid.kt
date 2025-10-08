@@ -1,31 +1,9 @@
 package com.seanproctor.datatable
 
-import com.android.build.api.dsl.CommonExtension
-import org.gradle.api.JavaVersion
+import com.android.build.api.dsl.androidLibrary
 import org.gradle.api.Project
 import org.jetbrains.kotlin.gradle.ExperimentalWasmDsl
 import org.jetbrains.kotlin.gradle.dsl.KotlinMultiplatformExtension
-
-internal fun Project.configureKotlinAndroid(
-    commonExtension: CommonExtension<*, *, *, *, *, *>,
-) {
-    commonExtension.apply {
-
-        compileSdk = 35
-        defaultConfig {
-            minSdk = 21
-        }
-        compileOptions {
-            sourceCompatibility = JavaVersion.VERSION_11
-            targetCompatibility = JavaVersion.VERSION_11
-        }
-        packaging {
-            resources {
-                excludes += "/META-INF/{AL2.0,LGPL2.1}"
-            }
-        }
-    }
-}
 
 /**
  * Configure base Kotlin options for all targets
@@ -38,8 +16,10 @@ internal fun Project.configureKotlinMultiplatform(
         jvmToolchain(11)
 
         // targets
-        androidTarget {
-            publishLibraryVariants("release")
+        androidLibrary {
+            minSdk = 21
+            compileSdk = 36
+            namespace = "com.seanproctor." + project.name.replace("-", ".")
         }
         jvm()
         js {
@@ -49,8 +29,8 @@ internal fun Project.configureKotlinMultiplatform(
         wasmJs {
             browser()
         }
-        iosX64()
         iosArm64()
+        iosX64()
         iosSimulatorArm64()
     }
 }
