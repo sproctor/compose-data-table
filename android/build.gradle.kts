@@ -15,7 +15,7 @@ android {
     namespace = "com.seanproctor.datatable.android"
     compileSdk = 36
     defaultConfig {
-        minSdk = 21
+        minSdk = 24
         targetSdk = 36
         applicationId = "com.seanproctor.datatable.android"
         versionCode = 1
