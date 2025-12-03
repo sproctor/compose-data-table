@@ -1,4 +1,4 @@
-![Maven Central](https://img.shields.io/maven-central/v/com.seanproctor/data-table)
+![Maven Central](https://img.shields.io/maven-central/v/com.seanproctor/datatable)
 
 # Compose Data Table
 
