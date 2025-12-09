@@ -1,9 +1,13 @@
 package com.seanproctor.datatable.paging
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 
 interface PaginatedDataTableState {
     var pageSize: Int
@@ -36,8 +40,14 @@ fun rememberPaginatedDataTableState(
     initialPageSize: Int,
     initialPageIndex: Int = 0,
     initialCount: Int = 0,
+
 ): PaginatedDataTableState {
     return rememberSaveable(saver = PaginatedDataTableStateImpl.Saver) {
         PaginatedDataTableStateImpl(initialPageSize, initialPageIndex, initialCount)
     }
+}
+
+sealed class SizePage {
+    data object FillMaxHeight : SizePage()
+    data class FixedSize(val initialPageSize: Int) : SizePage()
 }
