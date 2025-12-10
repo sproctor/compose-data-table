@@ -51,7 +51,6 @@ fun PaginatedDataTable(
     logger: ((String) -> Unit)? = null,
     content: DataTableScope.() -> Unit,
 ) {
-
     BasicPaginatedDataTable(
         columns = columns,
         modifier = modifier,
