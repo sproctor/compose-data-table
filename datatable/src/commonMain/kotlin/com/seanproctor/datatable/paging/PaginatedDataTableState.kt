@@ -8,6 +8,8 @@ import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.platform.LocalWindowInfo
+import androidx.compose.ui.unit.dp
 
 interface PaginatedDataTableState {
     var pageSize: Int
@@ -37,17 +39,25 @@ private class PaginatedDataTableStateImpl (
 
 @Composable
 fun rememberPaginatedDataTableState(
-    initialPageSize: Int,
+//    initialPageSize: Int,
+    initialPageSize: PageSize,
     initialPageIndex: Int = 0,
     initialCount: Int = 0,
+    ): PaginatedDataTableState {
+//    val windowInfo = LocalWindowInfo.current
+//    val tableHeaderHeight = 56.dp
+//    val tableRowHeight = 52.dp
+//    val windowHeight = ((windowInfo.containerSize.height.dp - tableHeaderHeight) / tableRowHeight).toInt()
+//    println("window: ${windowInfo.containerSize.height.dp}, sum: ${tableRowHeight}, all: ${windowHeight}")
 
-): PaginatedDataTableState {
     return rememberSaveable(saver = PaginatedDataTableStateImpl.Saver) {
-        PaginatedDataTableStateImpl(initialPageSize, initialPageIndex, initialCount)
+        val pageSizeValue = if (initialPageSize is PageSize.FixedSize) initialPageSize.initialPageSize else 5
+        PaginatedDataTableStateImpl(pageSizeValue, initialPageIndex, initialCount)
     }
 }
 
-sealed class SizePage {
-    data object FillMaxHeight : SizePage()
-    data class FixedSize(val initialPageSize: Int) : SizePage()
+sealed class PageSize {
+    data object FillMaxHeight : PageSize()
+    data class FixedSize(val initialPageSize: Int) : PageSize()
 }
+

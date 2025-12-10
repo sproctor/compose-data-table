@@ -1,10 +1,13 @@
 package com.seanproctor.datatable.demo
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
@@ -29,6 +32,7 @@ import com.seanproctor.datatable.TableColumnWidth
 import com.seanproctor.datatable.material3.DataTable
 import com.seanproctor.datatable.material3.LazyPaginatedDataTable
 import com.seanproctor.datatable.material3.PaginatedDataTable
+import com.seanproctor.datatable.paging.PageSize
 import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
 import io.github.oikvpqya.compose.fastscroller.HorizontalScrollbar
 import io.github.oikvpqya.compose.fastscroller.VerticalScrollbar
@@ -41,6 +45,7 @@ fun App(onRowClick: (Int) -> Unit) {
     Surface(Modifier.fillMaxSize()) {
         Column {
             var selectedIndex by remember { mutableStateOf(0) }
+//            Spacer(Modifier.height(90.dp))
             PrimaryTabRow(
                 selectedTabIndex = selectedIndex
             ) {
@@ -135,10 +140,13 @@ fun App(onRowClick: (Int) -> Unit) {
                 1 -> {
                     PaginatedDataTable(
                         columns = columns,
-                        state = rememberPaginatedDataTableState(5),
+//                        state = rememberPaginatedDataTableState(5),
+                        state = rememberPaginatedDataTableState(initialPageSize = PageSize.FillMaxHeight),
                         sortColumnIndex = sortColumnIndex,
                         sortAscending = sortAscending,
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        modifier = Modifier.fillMaxWidth()
+                            .background(Color.Red)
+                            .padding(16.dp),
                         logger = { println(it) }
                     ) {
                         generateTable(
@@ -152,7 +160,8 @@ fun App(onRowClick: (Int) -> Unit) {
                 else -> {
                     LazyPaginatedDataTable(
                         columns = columns,
-                        state = rememberPaginatedDataTableState(initialPageSize = 5, initialCount = sortedData.size),
+//                        state = rememberPaginatedDataTableState(initialPageSize = 5, initialCount = sortedData.size),
+                        state = rememberPaginatedDataTableState(initialPageSize = PageSize.FixedSize(2), initialCount = sortedData.size),
                         sortColumnIndex = sortColumnIndex,
                         sortAscending = sortAscending,
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
