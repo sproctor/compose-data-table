@@ -56,7 +56,7 @@ DataTable(
 }
 ```
 
-Draw a paginated table
+Draw a paginated table with fixed size
 ```kotlin
 PaginatedDataTable(
     columns = listOf(
@@ -70,7 +70,7 @@ PaginatedDataTable(
             Text("Column3")
         },
     ),
-    state = rememberPaginatedDataTableState(5),
+    state = rememberPaginatedDataTableState(initialSize = PageSize.FixedSize(5)),
 ) {
     for (rowIndex in 0 until 100) {
         row {
@@ -88,3 +88,39 @@ PaginatedDataTable(
     }
 }
 ```
+
+
+Draw paginated table with dynamic size (fill available height)
+
+```kotlin
+PaginatedDataTable(
+    columns = listOf(
+        DataColumn {
+            Text("Column1")
+        },
+        DataColumn {
+            Text("Column2")
+        },
+        DataColumn {
+            Text("Column3")
+        },
+    ),
+    state = rememberPaginatedDataTableState(initialSize = PageSize.FillMaxHeight),
+) {
+    for (rowIndex in 0 until 100) {
+        row {
+            onClick = { println("Row clicked: $rowIndex") }
+            cell {
+                Text("Row $rowIndex, column 1")
+            }
+            cell {
+                Text("Row $rowIndex, column 2")
+            }
+            cell {
+                Text("Row $rowIndex, column 3")
+            }
+        }
+    }
+}
+```
+

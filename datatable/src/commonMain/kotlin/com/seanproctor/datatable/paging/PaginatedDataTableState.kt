@@ -1,9 +1,20 @@
 package com.seanproctor.datatable.paging
 
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.Stable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.Saver
 import androidx.compose.runtime.saveable.listSaver
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
+
+
+/**
+ * PAGE_SIZE_FIXED_FLAG (-1) indicates dynamic page size.
+ * This is only used internally for automatic calculation.
+ */
+const val PAGE_SIZE_FIXED_FLAG = -1
 
 interface PaginatedDataTableState {
     var pageSize: Int
@@ -33,11 +44,18 @@ private class PaginatedDataTableStateImpl (
 
 @Composable
 fun rememberPaginatedDataTableState(
-    initialPageSize: Int,
+    initialSize: PageSize,
     initialPageIndex: Int = 0,
     initialCount: Int = 0,
-): PaginatedDataTableState {
+    ): PaginatedDataTableState {
     return rememberSaveable(saver = PaginatedDataTableStateImpl.Saver) {
-        PaginatedDataTableStateImpl(initialPageSize, initialPageIndex, initialCount)
+        val pageSizeValue = if (initialSize is PageSize.FixedSize) initialSize.initialPageSize else PAGE_SIZE_FIXED_FLAG
+        PaginatedDataTableStateImpl(pageSizeValue, initialPageIndex, initialCount)
     }
 }
+
+sealed class PageSize {
+    data object FillMaxHeight : PageSize()
+    data class FixedSize(val initialPageSize: Int) : PageSize()
+}
+

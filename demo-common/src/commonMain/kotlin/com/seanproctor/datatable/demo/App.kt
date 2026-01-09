@@ -29,6 +29,7 @@ import com.seanproctor.datatable.TableColumnWidth
 import com.seanproctor.datatable.material3.DataTable
 import com.seanproctor.datatable.material3.LazyPaginatedDataTable
 import com.seanproctor.datatable.material3.PaginatedDataTable
+import com.seanproctor.datatable.paging.PageSize
 import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
 import io.github.oikvpqya.compose.fastscroller.HorizontalScrollbar
 import io.github.oikvpqya.compose.fastscroller.VerticalScrollbar
@@ -135,7 +136,7 @@ fun App(onRowClick: (Int) -> Unit) {
                 1 -> {
                     PaginatedDataTable(
                         columns = columns,
-                        state = rememberPaginatedDataTableState(5),
+                        state = rememberPaginatedDataTableState(initialSize = PageSize.FixedSize(2)),
                         sortColumnIndex = sortColumnIndex,
                         sortAscending = sortAscending,
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
@@ -152,7 +153,7 @@ fun App(onRowClick: (Int) -> Unit) {
                 else -> {
                     LazyPaginatedDataTable(
                         columns = columns,
-                        state = rememberPaginatedDataTableState(initialPageSize = 5, initialCount = sortedData.size),
+                        state = rememberPaginatedDataTableState(initialSize = PageSize.FillMaxHeight, initialCount = sortedData.size),
                         sortColumnIndex = sortColumnIndex,
                         sortAscending = sortAscending,
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
