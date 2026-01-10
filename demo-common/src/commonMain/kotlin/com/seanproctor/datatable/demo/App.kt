@@ -27,13 +27,12 @@ import com.seanproctor.datatable.DataTableScope
 import com.seanproctor.datatable.DataTableState
 import com.seanproctor.datatable.TableColumnWidth
 import com.seanproctor.datatable.material3.DataTable
-import com.seanproctor.datatable.material3.LazyPaginatedDataTable
 import com.seanproctor.datatable.material3.PaginatedDataTable
+import com.seanproctor.datatable.paging.PageSize
 import com.seanproctor.datatable.paging.rememberPaginatedDataTableState
 import io.github.oikvpqya.compose.fastscroller.HorizontalScrollbar
 import io.github.oikvpqya.compose.fastscroller.VerticalScrollbar
 import io.github.oikvpqya.compose.fastscroller.material3.defaultMaterialScrollbarStyle
-import kotlin.math.min
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -44,7 +43,7 @@ fun App(onRowClick: (Int) -> Unit) {
             PrimaryTabRow(
                 selectedTabIndex = selectedIndex
             ) {
-                val titles = listOf("Normal", "Paginated", "Lazy paginated")
+                val titles = listOf("Normal", "Paginated")
                 titles.forEachIndexed { index, title ->
                     Tab(
                         selected = index == selectedIndex,
@@ -135,46 +134,27 @@ fun App(onRowClick: (Int) -> Unit) {
                 1 -> {
                     PaginatedDataTable(
                         columns = columns,
-                        state = rememberPaginatedDataTableState(5),
+                        state = rememberPaginatedDataTableState(count = sortedData.size, pageSize = PageSize.FitHeight),
                         sortColumnIndex = sortColumnIndex,
                         sortAscending = sortAscending,
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
                         logger = { println(it) }
-                    ) {
-                        generateTable(
-                            colorEven = colorEven,
-                            colorOdd = colorOdd,
-                            data = sortedData,
-                            onRowClick = onRowClick,
-                        )
-                    }
-                }
-                else -> {
-                    LazyPaginatedDataTable(
-                        columns = columns,
-                        state = rememberPaginatedDataTableState(initialPageSize = 5, initialCount = sortedData.size),
-                        sortColumnIndex = sortColumnIndex,
-                        sortAscending = sortAscending,
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
-                        logger = { println(it) },
-                        fetchPage = { state ->
-                            val fromIndex = state.pageIndex * state.pageSize
-                            val toIndex = min(fromIndex + state.pageSize, sortedData.size)
-                            val subset = sortedData.subList(fromIndex, toIndex)
-                            subset.forEachIndexed { index, rowData ->
-                                row {
-                                    onClick = { onRowClick(fromIndex + index) }
-                                    cell { }
-                                    cell {
-                                        Text(rowData.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                    }
-                                    cell {
-                                        Text(rowData.value.toString())
-                                    }
+                    ) { fromIndex, toIndex ->
+                        val subset = sortedData.subList(fromIndex, toIndex)
+                        subset.forEachIndexed { index, rowData ->
+                            row {
+                                onClick = { onRowClick(fromIndex + index) }
+                                backgroundColor = if (index % 2 == 0) colorEven else colorOdd
+                                cell { }
+                                cell {
+                                    Text(rowData.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                }
+                                cell {
+                                    Text(rowData.value.toString())
                                 }
                             }
                         }
-                    )
+                    }
                 }
             }
         }

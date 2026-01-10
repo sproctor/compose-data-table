@@ -46,7 +46,43 @@ private enum class SlotsEnum {
 }
 
 /**
- * Layout model that arranges its children into rows and columns.
+ * A composable function that renders a customizable data table with support for scrolling,
+ * sorting, headers, footers, and flexible column sizing.
+ *
+ * @param columns List of column definitions that specify width, alignment, header content,
+ * and optional sort handlers for each column.
+ * @param modifier Modifier to be applied to the table container.
+ * @param state State object for managing scroll positions. Use [rememberDataTableState] to create.
+ * @param separator Composable function to render separators between rows. Defaults to no separator.
+ * @param headerHeight The fixed height for the header row. Defaults to [Dp.Unspecified].
+ * @param rowHeight The height for data rows. Defaults to [Dp.Unspecified].
+ * @param contentPadding Padding applied to the content within each cell. Defaults to 16.dp horizontal padding.
+ * @param headerBackgroundColor Background color for the header row. Defaults to [Color.Unspecified].
+ * @param footerBackgroundColor Background color for the footer section. Defaults to [Color.Unspecified].
+ * @param footer Optional composable function to render footer content below the table.
+ * @param cellContentProvider Provider for rendering cell content with custom styling and behavior.
+ * Defaults to [DefaultCellContentProvider].
+ * @param sortColumnIndex The index of the currently sorted column, or null if no column is sorted.
+ * @param sortAscending Whether the sorted column is in ascending order. Defaults to true.
+ * @param logger Optional logging function for debugging table layout measurements.
+ * @param content Lambda with [DataTableScope] receiver that defines the table rows and their cells.
+ *
+ * @sample
+ * ```
+ * BasicDataTable(
+ *     columns = listOf(
+ *         DataColumn(width = ColumnWidth.Fixed(100.dp)) { Text("Name") },
+ *         DataColumn(width = ColumnWidth.Flex(1f)) { Text("Description") }
+ *     ),
+ *     headerHeight = 56.dp,
+ *     rowHeight = 52.dp
+ * ) {
+ *     row {
+ *         cell { Text("John Doe") }
+ *         cell { Text("Software Engineer") }
+ *     }
+ * }
+ * ```
  */
 @Composable
 fun BasicDataTable(
