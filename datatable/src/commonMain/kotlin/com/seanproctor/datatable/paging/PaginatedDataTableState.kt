@@ -32,14 +32,17 @@ private class PaginatedDataTableStateImpl(
 
     companion object {
         val Saver: Saver<PaginatedDataTableState, *> = listSaver(
-            save = { listOf(it.pageSize, it.currentPageIndex, it.count, it.currentPageSize) },
+            save = { listOf(it.pageSize == PageSize.FitHeight, it.currentPageIndex, it.count, it.currentPageSize) },
             restore = {
+                val storedPageSize = it[3] as Int
+                val isFitHeight = it[0] as Boolean
+                val pageSize = if (isFitHeight) PageSize.FitHeight else PageSize.FixedSize(storedPageSize)
                 PaginatedDataTableStateImpl(
-                    pageSize = it[0] as PageSize,
+                    pageSize = pageSize,
                     initialPageIndex = it[1] as Int,
                     count = it[2] as Int,
                 ).apply {
-                    currentPageSize = it[3] as Int
+                    currentPageSize = storedPageSize
                 }
             }
         )
