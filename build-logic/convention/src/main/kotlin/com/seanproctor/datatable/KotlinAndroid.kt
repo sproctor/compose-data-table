@@ -20,6 +20,7 @@ internal fun Project.configureKotlinMultiplatform(
             minSdk = 21
             compileSdk = 36
             namespace = "com.seanproctor." + project.name.replace("-", ".")
+            androidResources.enable = true
         }
         jvm()
         js {
