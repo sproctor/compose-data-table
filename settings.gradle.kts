@@ -26,10 +26,7 @@ include(":datatable")
 include(":datatable-material3")
 
 // Demo apps
-include(":demo-common")
-include(":android")
-include(":desktop")
-include(":ios:framework")
+include(":demo")
 
 refreshVersions {
     file("build/tmp/refreshVersions").mkdirs()

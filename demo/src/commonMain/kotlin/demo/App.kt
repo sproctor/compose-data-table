@@ -55,6 +55,7 @@ fun App(onRowClick: (Int) -> Unit) {
             val rowData = (0 until 30).map { index ->
                 DemoData(index + 1f, "index: $index")
             }
+            println("rowData: $rowData")
             var sortColumnIndex by remember { mutableStateOf<Int?>(null) }
             var sortAscending by remember { mutableStateOf(true) }
 
@@ -99,7 +100,7 @@ fun App(onRowClick: (Int) -> Unit) {
                             state = scrollState,
                             sortColumnIndex = sortColumnIndex,
                             sortAscending = sortAscending,
-                            modifier = Modifier.fillMaxWidth().padding(16.dp),
+                            modifier = Modifier.fillMaxSize().padding(16.dp),
                             footer = {
                                 Box {
                                     Text(
@@ -137,7 +138,7 @@ fun App(onRowClick: (Int) -> Unit) {
                         state = rememberPaginatedDataTableState(count = sortedData.size, pageSize = PageSize.FitHeight),
                         sortColumnIndex = sortColumnIndex,
                         sortAscending = sortAscending,
-                        modifier = Modifier.fillMaxWidth().padding(16.dp),
+                        modifier = Modifier.fillMaxSize().padding(16.dp),
                         logger = { println(it) }
                     ) { fromIndex, toIndex ->
                         val subset = sortedData.subList(fromIndex, toIndex)
