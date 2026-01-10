@@ -139,11 +139,12 @@ fun App(onRowClick: (Int) -> Unit) {
                         sortAscending = sortAscending,
                         modifier = Modifier.fillMaxWidth().padding(16.dp),
                         logger = { println(it) }
-                    ) { offset, length ->
-                        val subset = sortedData.subList(offset, offset + length)
+                    ) { fromIndex, toIndex ->
+                        val subset = sortedData.subList(fromIndex, toIndex)
                         subset.forEachIndexed { index, rowData ->
                             row {
-                                onClick = { onRowClick(offset + index) }
+                                onClick = { onRowClick(fromIndex + index) }
+                                backgroundColor = if (index % 2 == 0) colorEven else colorOdd
                                 cell { }
                                 cell {
                                     Text(rowData.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
