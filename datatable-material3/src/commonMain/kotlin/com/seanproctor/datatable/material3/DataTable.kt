@@ -30,7 +30,48 @@ import com.seanproctor.datatable.DataTableState
 import com.seanproctor.datatable.rememberDataTableState
 
 /**
- * Layout model that arranges its children into rows and columns.
+ * A composable function that renders a Material 3 styled customizable data table with support
+ * for scrolling, sorting, headers, footers, and flexible column sizing.
+ *
+ * This is a convenience wrapper around [BasicDataTable] that applies Material 3 styling
+ * through [Material3CellContentProvider]. It provides sensible defaults for common use cases
+ * including horizontal dividers between rows and standard Material 3 sizing.
+ *
+ * @param columns List of column definitions specifying width, alignment, header content,
+ * and optional sort behavior for each column.
+ * @param modifier Modifier to be applied to the table container.
+ * @param state State object for managing scroll positions and table state.
+ * Use [rememberDataTableState] to create and persist across recompositions.
+ * @param separator Composable function to render between rows. Defaults to [HorizontalDivider].
+ * @param headerHeight Height of the header row. Defaults to 56.dp per Material 3 guidelines.
+ * @param rowHeight Height of data rows. Defaults to 52.dp per Material 3 guidelines.
+ * @param contentPadding Padding applied inside each table cell. Defaults to 16.dp horizontal padding.
+ * @param headerBackgroundColor Background color for the header row. Defaults to [Color.Unspecified].
+ * @param footerBackgroundColor Background color for the footer section. Defaults to [Color.Unspecified].
+ * @param footer Composable function to render footer content below the table. Defaults to empty content.
+ * @param sortColumnIndex Zero-based index of the currently sorted column, or null if unsorted.
+ * @param sortAscending Whether the sort order is ascending. Only applies when [sortColumnIndex] is set.
+ * Defaults to true.
+ * @param logger Optional callback for logging table layout measurements during development.
+ * @param content Lambda with [DataTableScope] receiver that defines the table's row and cell structure.
+ *
+ * @sample
+ * ```
+ * DataTable(
+ *     columns = listOf(
+ *         DataColumn(width = ColumnWidth.Fixed(100.dp)) { Text("Name") },
+ *         DataColumn(width = ColumnWidth.Flex(1f)) { Text("Description") }
+ *     )
+ * ) {
+ *     row {
+ *         cell { Text("John Doe") }
+ *         cell { Text("Software Engineer") }
+ *     }
+ * }
+ * ```
+ *
+ * @see BasicDataTable for a lower-level table implementation with custom cell providers
+ * @see DataTableScope for available row configuration options
  */
 @Composable
 fun DataTable(
