@@ -4,6 +4,6 @@ import com.seanproctor.datatable.demo.App
 import platform.UIKit.UIViewController
 
 @Suppress("standard:function-naming")
-fun mainViewController(): UIViewController = ComposeUIViewController {
+fun MainViewController(): UIViewController = ComposeUIViewController {
   App { println("Row clicked: $it") }
 }

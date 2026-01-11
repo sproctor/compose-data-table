@@ -26,7 +26,7 @@ include(":datatable")
 include(":datatable-material3")
 
 // Demo apps
-include(":demo")
+include(":demoApp")
 
 refreshVersions {
     file("build/tmp/refreshVersions").mkdirs()
