@@ -8,8 +8,8 @@ kotlin {
         commonMain {
             dependencies {
                 api(project(":datatable"))
-                implementation(compose.material3)
-                implementation(compose.components.resources)
+                implementation(libs.compose.material3)
+                implementation(libs.compose.components.resources)
             }
         }
     }

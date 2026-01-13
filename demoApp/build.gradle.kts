@@ -33,13 +33,13 @@ kotlin {
         androidMain {
             dependencies {
                 implementation(libs.activity.compose)
-                implementation(compose.uiTooling)
+                implementation(libs.compose.ui.tooling)
             }
         }
         commonMain {
             dependencies {
                 implementation(project(":datatable-material3"))
-                implementation(compose.material3)
+                implementation(libs.compose.material3)
                 implementation(libs.fastscroller.m3)
             }
         }
