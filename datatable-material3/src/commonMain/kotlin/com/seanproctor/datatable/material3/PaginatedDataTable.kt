@@ -30,8 +30,8 @@ import com.seanproctor.datatable_material3.generated.resources.chevron_left
 import com.seanproctor.datatable_material3.generated.resources.chevron_right
 import com.seanproctor.datatable_material3.generated.resources.first_page
 import com.seanproctor.datatable_material3.generated.resources.last_page
-import org.jetbrains.compose.resources.painterResource
 import kotlin.math.min
+import org.jetbrains.compose.resources.painterResource
 
 /**
  * A composable function that renders a Material 3 styled paginated data table with support for
@@ -58,14 +58,16 @@ import kotlin.math.min
  * @param footerBackgroundColor Background color for the footer section. Defaults to [Color.Unspecified].
  * @param sortColumnIndex Zero-based index of the currently sorted column, or null if no column is sorted.
  * @param sortAscending Whether the sorted column is in ascending order. Defaults to true.
+ * @param logger Optional logging function for debugging table layout measurements.
  * @param selectable Whether to show a leading checkbox column for selecting rows. Each row's
  *    selection is controlled by [TableRowScope.selected] and [TableRowScope.onSelectedChange].
  * @param selectAllState State of the "select all" checkbox in the header. When null, it is derived from the rows on
- *    the current page. Pass it explicitly to reflect a selection that spans pages.
+ *    the current page, and [onSelectAllChange] should then select or clear only that page's rows. If the selection
+ *    spans pages and "select all" acts on every page, pass the state for the whole data set instead.
  * @param onSelectAllChange Called when the header checkbox is clicked, with `true` to select all rows or `false` to
- *    clear the selection. When null, the header checkbox is disabled.
+ *    clear the selection. When null, or when [selectAllState] is null and no row on the page can be selected, the
+ *    header checkbox is disabled.
  * @param selectedRowColor Color drawn over the background of selected rows. Defaults to primary at 8% opacity.
- * @param logger Optional logging function for debugging table layout measurements.
  * @param content Lambda with [DataTableScope] receiver that defines table rows for the current page.
  * Receives [fromIndex] (inclusive) and [toIndex] (exclusive) parameters indicating which data items
  * should be rendered on the current page.
@@ -113,11 +115,11 @@ fun PaginatedDataTable(
     footerBackgroundColor: Color = MaterialTheme.colorScheme.surface,
     sortColumnIndex: Int? = null,
     sortAscending: Boolean = true,
+    logger: ((String) -> Unit)? = null,
     selectable: Boolean = false,
     selectAllState: ToggleableState? = null,
     onSelectAllChange: ((Boolean) -> Unit)? = null,
     selectedRowColor: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
-    logger: ((String) -> Unit)? = null,
     content: DataTableScope.(fromIndex: Int, toIndex: Int) -> Unit,
 ) {
     BasicPaginatedDataTable(

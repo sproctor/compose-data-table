@@ -36,6 +36,7 @@ import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.*
 import kotlin.math.max
@@ -68,15 +69,15 @@ private enum class SlotsEnum {
  * Defaults to [DefaultCellContentProvider].
  * @param sortColumnIndex The index of the currently sorted column, or null if no column is sorted.
  * @param sortAscending Whether the sorted column is in ascending order. Defaults to true.
+ * @param logger Optional logging function for debugging table layout measurements.
  * @param selectable Whether to show a leading checkbox column for selecting rows. Each row's
  * selection is controlled by [TableRowScope.selected] and [TableRowScope.onSelectedChange].
  * @param selectAllState State of the "select all" checkbox in the header. When null, it is derived
- * from the [TableRowScope.selected] values of the body rows.
+ * from the [TableRowScope.selected] values of the rows that can be selected.
  * @param onSelectAllChange Called when the header checkbox is clicked, with `true` to select all
- * rows or `false` to clear the selection. When null, the header checkbox is disabled.
+ * rows or `false` to clear the selection. When null, or when [selectAllState] is null and no row can be selected, the header checkbox is disabled.
  * @param selectedRowColor Color drawn over the background of selected rows. Defaults to
  * [Color.Unspecified] (no tint).
- * @param logger Optional logging function for debugging table layout measurements.
  * @param content Lambda with [DataTableScope] receiver that defines the table rows and their cells.
  *
  * @sample
@@ -111,11 +112,11 @@ fun BasicDataTable(
     cellContentProvider: CellContentProvider = DefaultCellContentProvider,
     sortColumnIndex: Int? = null,
     sortAscending: Boolean = true,
+    logger: ((String) -> Unit)? = null,
     selectable: Boolean = false,
     selectAllState: ToggleableState? = null,
     onSelectAllChange: ((Boolean) -> Unit)? = null,
     selectedRowColor: Color = Color.Unspecified,
-    logger: ((String) -> Unit)? = null,
     content: DataTableScope.() -> Unit
 ) {
     val headerIndexes = mutableListOf<Int>()
@@ -130,13 +131,15 @@ fun BasicDataTable(
     } else {
         ToggleableState.Off
     }
+    // With a derived state, "select all" only makes sense when some row can be selected.
+    val selectAllEnabled = selectAllState != null || tableScope.tableRows.any { it.isSelectable }
     val cellContents = @Composable {
         with(tableScope) {
             if (selectable) {
                 Box(Modifier.padding(contentPadding)) {
                     cellContentProvider.HeaderSelectionCellContent(
                         state = headerSelectionState,
-                        onClick = onSelectAllChange?.let {
+                        onClick = onSelectAllChange?.takeIf { selectAllEnabled }?.let {
                             { it(headerSelectionState != ToggleableState.On) }
                         },
                     )
@@ -170,8 +173,15 @@ fun BasicDataTable(
                     check(cells.size <= columns.size) { "Row $rowIndex has too many cells." }
                     check(cells.size >= columns.size) { "Row $rowIndex doesn't have enough cells." }
                     if (selectable) {
+                        // When the whole row is the toggle, it carries the checkbox semantics;
+                        // hide the cell's checkbox so accessibility services don't see two.
+                        val rowIsToggle = onClick == null && isSelectable
                         // Must have exactly 1 Composable per cell
-                        Box(Modifier.padding(contentPadding)) {
+                        Box(
+                            Modifier
+                                .padding(contentPadding)
+                                .then(if (rowIsToggle) Modifier.clearAndSetSemantics { } else Modifier)
+                        ) {
                             if (!isHeader && !isFooter) {
                                 cellContentProvider.SelectionCellContent(
                                     selected = selected,
@@ -446,17 +456,20 @@ private val SelectionColumn = DataColumn(
     width = TableColumnWidth.Wrap,
 ) { }
 
+/** A body row that the user can select. */
+private val TableRowScopeImpl.isSelectable: Boolean
+    get() = !isHeader && !isFooter && onSelectedChange != null
+
+/** Derives the header checkbox state from the rows the user can select. */
 private fun DataTableScopeImpl.deriveSelectAllState(): ToggleableState {
     var anySelected = false
     var allSelected = true
-    var anyBodyRows = false
     for (row in tableRows) {
-        if (row.isHeader || row.isFooter) continue
-        anyBodyRows = true
+        if (!row.isSelectable) continue
         if (row.selected) anySelected = true else allSelected = false
     }
     return when {
-        !anyBodyRows || !anySelected -> ToggleableState.Off
+        !anySelected -> ToggleableState.Off
         allSelected -> ToggleableState.On
         else -> ToggleableState.Indeterminate
     }
