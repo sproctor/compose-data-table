@@ -24,15 +24,19 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
+import androidx.compose.ui.graphics.isSpecified
 import androidx.compose.ui.layout.Placeable
 import androidx.compose.ui.layout.SubcomposeLayout
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.*
 import kotlin.math.max
 import kotlin.math.roundToInt
@@ -64,6 +68,14 @@ private enum class SlotsEnum {
  * Defaults to [DefaultCellContentProvider].
  * @param sortColumnIndex The index of the currently sorted column, or null if no column is sorted.
  * @param sortAscending Whether the sorted column is in ascending order. Defaults to true.
+ * @param selectable Whether to show a leading checkbox column for selecting rows. Each row's
+ * selection is controlled by [TableRowScope.selected] and [TableRowScope.onSelectedChange].
+ * @param selectAllState State of the "select all" checkbox in the header. When null, it is derived
+ * from the [TableRowScope.selected] values of the body rows.
+ * @param onSelectAllChange Called when the header checkbox is clicked, with `true` to select all
+ * rows or `false` to clear the selection. When null, the header checkbox is disabled.
+ * @param selectedRowColor Color drawn over the background of selected rows. Defaults to
+ * [Color.Unspecified] (no tint).
  * @param logger Optional logging function for debugging table layout measurements.
  * @param content Lambda with [DataTableScope] receiver that defines the table rows and their cells.
  *
@@ -99,6 +111,10 @@ fun BasicDataTable(
     cellContentProvider: CellContentProvider = DefaultCellContentProvider,
     sortColumnIndex: Int? = null,
     sortAscending: Boolean = true,
+    selectable: Boolean = false,
+    selectAllState: ToggleableState? = null,
+    onSelectAllChange: ((Boolean) -> Unit)? = null,
+    selectedRowColor: Color = Color.Unspecified,
     logger: ((String) -> Unit)? = null,
     content: DataTableScope.() -> Unit
 ) {
@@ -106,8 +122,26 @@ fun BasicDataTable(
     val footerIndexes = mutableListOf<Int>()
 
     val tableScope = DataTableScopeImpl(content)
+    // When selectable, a checkbox column is placed before the caller's columns. Caller-facing
+    // column indexes (sortColumnIndex, onSort, TableCellScope.columnIndex) are unaffected.
+    val effectiveColumns = if (selectable) listOf(SelectionColumn) + columns else columns
+    val headerSelectionState = if (selectable) {
+        selectAllState ?: tableScope.deriveSelectAllState()
+    } else {
+        ToggleableState.Off
+    }
     val cellContents = @Composable {
         with(tableScope) {
+            if (selectable) {
+                Box(Modifier.padding(contentPadding)) {
+                    cellContentProvider.HeaderSelectionCellContent(
+                        state = headerSelectionState,
+                        onClick = onSelectAllChange?.let {
+                            { it(headerSelectionState != ToggleableState.On) }
+                        },
+                    )
+                }
+            }
             columns.forEachIndexed { columnIndex, columnDefinition ->
                 val sorted = columnIndex == sortColumnIndex
                 cellContentProvider.HeaderCellContent(
@@ -135,6 +169,17 @@ fun BasicDataTable(
                     }
                     check(cells.size <= columns.size) { "Row $rowIndex has too many cells." }
                     check(cells.size >= columns.size) { "Row $rowIndex doesn't have enough cells." }
+                    if (selectable) {
+                        // Must have exactly 1 Composable per cell
+                        Box(Modifier.padding(contentPadding)) {
+                            if (!isHeader && !isFooter) {
+                                cellContentProvider.SelectionCellContent(
+                                    selected = selected,
+                                    onSelectedChange = onSelectedChange,
+                                )
+                            }
+                        }
+                    }
                     cells.forEachIndexed { index, cellData ->
                         // Must have exactly 1 Composable per cell
                         Box(Modifier.padding(contentPadding)) {
@@ -149,7 +194,7 @@ fun BasicDataTable(
     }
 
     val layoutDirection = LocalLayoutDirection.current
-    val columnCount = columns.size
+    val columnCount = effectiveColumns.size
     val rowCount = tableScope.tableRows.size + 1
 
     SubcomposeLayout(
@@ -178,7 +223,7 @@ fun BasicDataTable(
         var minTableWidth = 0
         var neededColumnWidth = 0
         for (column in 0 until columnCount) {
-            val spec = columns[column].width
+            val spec = effectiveColumns[column].width
             val cells = List(rowCount) { row ->
                 TableMeasurable(
                     preferredWidth = {
@@ -224,7 +269,7 @@ fun BasicDataTable(
         // Grow flexible columns to fill available horizontal space.
         if (totalFlex > 0 && remainingSpace > 0) {
             for (column in 0 until columnCount) {
-                val spec = columns[column].width
+                val spec = effectiveColumns[column].width
                 if (spec.flexValue > 0) {
                     val roundedSpace = (remainingSpace * (spec.flexValue / totalFlex)).roundToInt()
                     totalFlex -= spec.flexValue
@@ -242,7 +287,7 @@ fun BasicDataTable(
         val totalWidth = columnWidths.sum()
         val tableWidth = totalWidth.coerceIn(constraints.minWidth, constraints.maxWidth)
 
-        val columnAlignment = Array(columnCount) { columns[it].alignment }
+        val columnAlignment = Array(columnCount) { effectiveColumns[it].alignment }
 
         // Measure the remaining children and calculate row heights.
         val measuredRows = mutableListOf<DataTableMeasuredElement>()
@@ -281,11 +326,31 @@ fun BasicDataTable(
                         }
                     } else {
                         val rowData = tableScope.tableRows[row - 1]
+                        val isBodyRow = !rowData.isHeader && !rowData.isFooter
+                        val showSelected = selectable && isBodyRow && rowData.selected
+                        val onSelectedChange = rowData.onSelectedChange
                         Box(
                             Modifier
                                 .background(rowData.backgroundColor)
+                                .then(
+                                    if (showSelected && selectedRowColor.isSpecified) {
+                                        Modifier.background(selectedRowColor)
+                                    } else {
+                                        Modifier
+                                    }
+                                )
                                 .fillMaxSize()
-                                .then(if (rowData.onClick != null) Modifier.clickable { rowData.onClick?.invoke() } else Modifier)
+                                .then(
+                                    when {
+                                        rowData.onClick != null -> Modifier.clickable { rowData.onClick?.invoke() }
+                                        selectable && isBodyRow && onSelectedChange != null -> Modifier.toggleable(
+                                            value = rowData.selected,
+                                            role = Role.Checkbox,
+                                            onValueChange = onSelectedChange,
+                                        )
+                                        else -> Modifier
+                                    }
+                                )
                         ) {
                             if (row < rowCount - 1) {
                                 Box(Modifier.align(Alignment.BottomStart)) {
@@ -373,6 +438,27 @@ fun BasicDataTable(
                 }
             }
         }
+    }
+}
+
+private val SelectionColumn = DataColumn(
+    alignment = Alignment.Center,
+    width = TableColumnWidth.Wrap,
+) { }
+
+private fun DataTableScopeImpl.deriveSelectAllState(): ToggleableState {
+    var anySelected = false
+    var allSelected = true
+    var anyBodyRows = false
+    for (row in tableRows) {
+        if (row.isHeader || row.isFooter) continue
+        anyBodyRows = true
+        if (row.selected) anySelected = true else allSelected = false
+    }
+    return when {
+        !anyBodyRows || !anySelected -> ToggleableState.Off
+        allSelected -> ToggleableState.On
+        else -> ToggleableState.Indeterminate
     }
 }
 

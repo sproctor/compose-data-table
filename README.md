@@ -94,3 +94,29 @@ PaginatedDataTable(
 }
 ```
 
+
+Selectable rows
+
+Set `selectable = true` to add a leading checkbox column. Selection state is owned by the caller: each
+row reports whether it is `selected` and handles `onSelectedChange`. The header checkbox shows whether
+all, some, or none of the rows are selected; pass `selectAllState` to override it (for example, when a
+selection spans pages of a paginated table). Rows without an `onClick` toggle their selection when
+clicked.
+
+```kotlin
+val items = listOf("Apple", "Banana", "Cherry")
+var selection by remember { mutableStateOf(emptySet<String>()) }
+DataTable(
+    columns = listOf(DataColumn { Text("Fruit") }),
+    selectable = true,
+    onSelectAllChange = { selectAll -> selection = if (selectAll) items.toSet() else emptySet() },
+) {
+    for (item in items) {
+        row {
+            selected = item in selection
+            onSelectedChange = { selection = if (it) selection + item else selection - item }
+            cell { Text(item) }
+        }
+    }
+}
+```

@@ -37,10 +37,11 @@ The core abstraction layers, from low to high:
 3. **`DataTable` / `PaginatedDataTable`** (in `:datatable-material3`) — Public convenience wrappers that inject the M3 provider and defaults.
 
 Key pieces:
-- **DSL** (`DataTableDsl.kt`) — `DataTableScope.row { ... }` builds `TableRowScopeImpl`, and `TableRowScope.cell { ... }` collects cell composables. Rows carry `onClick`, `height`, `isHeader`, `isFooter`, `backgroundColor`. The content lambda runs eagerly to collect rows before layout.
+- **DSL** (`DataTableDsl.kt`) — `DataTableScope.row { ... }` builds `TableRowScopeImpl`, and `TableRowScope.cell { ... }` collects cell composables. Rows carry `onClick`, `height`, `isHeader`, `isFooter`, `backgroundColor`, `selected`, `onSelectedChange`. The content lambda runs eagerly to collect rows before layout.
 - **Columns** (`DataColumn.kt`) — Each column has an `alignment`, a `TableColumnWidth`, an optional `onSort` callback, and a header composable.
 - **Column widths** (`TableColumnWidth.kt`) — Sealed hierarchy: `Flex`, `Fixed`, `Fraction`, `Wrap`, `MinIntrinsic`, `MaxIntrinsic`, plus combinators `Min`/`Max` and `.flexible(flex)`. Drives the measurement pass.
 - **State** — `DataTableState` (+ `rememberDataTableState`) holds scroll state. `PaginatedDataTableState` (+ `rememberPaginatedDataTableState`) adds `count`, `pageIndex`, and `PageSize` (`FixedSize` or `FillMaxHeight`); the paginated content lambda receives `(fromIndex, toIndex)`.
+- **Selection** — `selectable = true` makes `BasicDataTable` prepend an internal checkbox column (`effectiveColumns`); caller-facing column indexes (`sortColumnIndex`, `onSort`, `TableCellScope.columnIndex`) stay relative to the caller's `columns`. State is hoisted per row (`selected`/`onSelectedChange`); the header's `ToggleableState` is derived from body rows unless `selectAllState` is passed. Checkboxes render via `CellContentProvider.SelectionCellContent`/`HeaderSelectionCellContent` (default bodies in the interface, M3 overrides).
 - **Sorting** — Driven by `sortColumnIndex`/`sortAscending` params plus per-column `onSort`. The provider renders the sort icon; `isSortIconTrailing` controls icon placement.
 
 ## Build conventions

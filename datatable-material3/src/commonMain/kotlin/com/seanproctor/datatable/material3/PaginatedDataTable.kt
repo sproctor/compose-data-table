@@ -15,10 +15,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.seanproctor.datatable.DataColumn
 import com.seanproctor.datatable.DataTableScope
+import com.seanproctor.datatable.TableRowScope
 import com.seanproctor.datatable.paging.BasicPaginatedDataTable
 import com.seanproctor.datatable.paging.PageSize
 import com.seanproctor.datatable.paging.PaginatedDataTableState
@@ -56,6 +58,13 @@ import kotlin.math.min
  * @param footerBackgroundColor Background color for the footer section. Defaults to [Color.Unspecified].
  * @param sortColumnIndex Zero-based index of the currently sorted column, or null if no column is sorted.
  * @param sortAscending Whether the sorted column is in ascending order. Defaults to true.
+ * @param selectable Whether to show a leading checkbox column for selecting rows. Each row's
+ *    selection is controlled by [TableRowScope.selected] and [TableRowScope.onSelectedChange].
+ * @param selectAllState State of the "select all" checkbox in the header. When null, it is derived from the rows on
+ *    the current page. Pass it explicitly to reflect a selection that spans pages.
+ * @param onSelectAllChange Called when the header checkbox is clicked, with `true` to select all rows or `false` to
+ *    clear the selection. When null, the header checkbox is disabled.
+ * @param selectedRowColor Color drawn over the background of selected rows. Defaults to primary at 8% opacity.
  * @param logger Optional logging function for debugging table layout measurements.
  * @param content Lambda with [DataTableScope] receiver that defines table rows for the current page.
  * Receives [fromIndex] (inclusive) and [toIndex] (exclusive) parameters indicating which data items
@@ -104,6 +113,10 @@ fun PaginatedDataTable(
     footerBackgroundColor: Color = MaterialTheme.colorScheme.surface,
     sortColumnIndex: Int? = null,
     sortAscending: Boolean = true,
+    selectable: Boolean = false,
+    selectAllState: ToggleableState? = null,
+    onSelectAllChange: ((Boolean) -> Unit)? = null,
+    selectedRowColor: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
     logger: ((String) -> Unit)? = null,
     content: DataTableScope.(fromIndex: Int, toIndex: Int) -> Unit,
 ) {
@@ -168,6 +181,10 @@ fun PaginatedDataTable(
         cellContentProvider = Material3CellContentProvider,
         sortColumnIndex = sortColumnIndex,
         sortAscending = sortAscending,
+        selectable = selectable,
+        selectAllState = selectAllState,
+        onSelectAllChange = onSelectAllChange,
+        selectedRowColor = selectedRowColor,
         logger = logger,
         content = content
     )
