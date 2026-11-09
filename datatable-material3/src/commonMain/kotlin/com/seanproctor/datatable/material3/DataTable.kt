@@ -18,15 +18,18 @@ package com.seanproctor.datatable.material3
 
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.seanproctor.datatable.BasicDataTable
 import com.seanproctor.datatable.DataColumn
 import com.seanproctor.datatable.DataTableScope
 import com.seanproctor.datatable.DataTableState
+import com.seanproctor.datatable.TableRowScope
 import com.seanproctor.datatable.rememberDataTableState
 
 /**
@@ -53,6 +56,14 @@ import com.seanproctor.datatable.rememberDataTableState
  * @param sortAscending Whether the sort order is ascending. Only applies when [sortColumnIndex] is set.
  * Defaults to true.
  * @param logger Optional callback for logging table layout measurements during development.
+ * @param selectable Whether to show a leading checkbox column for selecting rows. Each row's
+ *    selection is controlled by [TableRowScope.selected] and [TableRowScope.onSelectedChange].
+ * @param selectAllState State of the "select all" checkbox in the header. When null, it is derived from the
+ *    [TableRowScope.selected] values of the rows that can be selected.
+ * @param onSelectAllChange Called when the header checkbox is clicked, with `true` to select all rows or `false` to
+ *    clear the selection. When null, or when [selectAllState] is null and no row can be selected, the header
+ *    checkbox is disabled.
+ * @param selectedRowColor Color drawn over the background of selected rows. Defaults to primary at 8% opacity.
  * @param content Lambda with [DataTableScope] receiver that defines the table's row and cell structure.
  *
  * @sample
@@ -88,6 +99,10 @@ fun DataTable(
     sortColumnIndex: Int? = null,
     sortAscending: Boolean = true,
     logger: ((String) -> Unit)? = null,
+    selectable: Boolean = false,
+    selectAllState: ToggleableState? = null,
+    onSelectAllChange: ((Boolean) -> Unit)? = null,
+    selectedRowColor: Color = MaterialTheme.colorScheme.primary.copy(alpha = 0.08f),
     content: DataTableScope.() -> Unit
 ) {
     BasicDataTable(
@@ -104,6 +119,10 @@ fun DataTable(
         cellContentProvider = Material3CellContentProvider,
         sortColumnIndex = sortColumnIndex,
         sortAscending = sortAscending,
+        selectable = selectable,
+        selectAllState = selectAllState,
+        onSelectAllChange = onSelectAllChange,
+        selectedRowColor = selectedRowColor,
         logger = logger,
         content = content
     )

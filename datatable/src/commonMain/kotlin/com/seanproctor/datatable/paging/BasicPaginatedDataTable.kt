@@ -12,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.seanproctor.datatable.BasicDataTable
@@ -20,6 +21,7 @@ import com.seanproctor.datatable.DataColumn
 import com.seanproctor.datatable.DataTableScope
 import com.seanproctor.datatable.DataTableState
 import com.seanproctor.datatable.DefaultCellContentProvider
+import com.seanproctor.datatable.TableRowScope
 import kotlin.math.min
 
 /**
@@ -50,6 +52,16 @@ import kotlin.math.min
  * @param sortColumnIndex Zero-based index of the currently sorted column, or null if no column is sorted.
  * @param sortAscending Whether the sorted column is in ascending order. Defaults to true.
  * @param logger Optional logging function for debugging table layout measurements.
+ * @param selectable Whether to show a leading checkbox column for selecting rows. Each row's
+ *    selection is controlled by [TableRowScope.selected] and [TableRowScope.onSelectedChange].
+ * @param selectAllState State of the "select all" checkbox in the header. When null, it is derived from the rows on
+ *    the current page, and [onSelectAllChange] should then select or clear only that page's rows. If the selection
+ *    spans pages and "select all" acts on every page, pass the state for the whole data set instead.
+ * @param onSelectAllChange Called when the header checkbox is clicked, with `true` to select all rows or `false` to
+ *    clear the selection. When null, or when [selectAllState] is null and no row on the page can be selected, the
+ *    header checkbox is disabled.
+ * @param selectedRowColor Color drawn over the background of selected rows. Defaults to [Color.Unspecified]
+ *    (no tint).
  * @param content Lambda with [DataTableScope] receiver that defines table rows for the current page. Receives
  *    [fromIndex] (inclusive) and [toIndex] (exclusive) parameters indicating which data items should be rendered on the
  *    current page.
@@ -100,6 +112,10 @@ fun BasicPaginatedDataTable(
     sortColumnIndex: Int? = null,
     sortAscending: Boolean = true,
     logger: ((String) -> Unit)? = null,
+    selectable: Boolean = false,
+    selectAllState: ToggleableState? = null,
+    onSelectAllChange: ((Boolean) -> Unit)? = null,
+    selectedRowColor: Color = Color.Unspecified,
     content: DataTableScope.(fromIndex: Int, toIndex: Int) -> Unit
 ) {
     require(state.pageSize != PageSize.FitHeight || headerHeight != Dp.Unspecified) {
@@ -154,6 +170,10 @@ fun BasicPaginatedDataTable(
         cellContentProvider = cellContentProvider,
         sortColumnIndex = sortColumnIndex,
         sortAscending = sortAscending,
+        selectable = selectable,
+        selectAllState = selectAllState,
+        onSelectAllChange = onSelectAllChange,
+        selectedRowColor = selectedRowColor,
         logger = logger,
     ) {
         val fromIndex = state.currentPageSize * state.currentPageIndex

@@ -29,6 +29,18 @@ interface TableRowScope {
     var isFooter: Boolean
     var backgroundColor: Color
 
+    /**
+     * Whether this row is selected. Only has an effect when the table is `selectable`. Selected
+     * rows show a checked checkbox and are tinted with the table's `selectedRowColor`.
+     */
+    var selected: Boolean
+
+    /**
+     * Called when the user toggles this row's selection, either with its checkbox or, when
+     * [onClick] is null, by clicking the row. When null, the row's checkbox is disabled.
+     */
+    var onSelectedChange: ((Boolean) -> Unit)?
+
     fun cell(content: @Composable TableCellScope.() -> Unit)
 }
 
@@ -61,6 +73,8 @@ internal class TableRowScopeImpl(
     override var isHeader: Boolean = false
     override var isFooter: Boolean = false
     override var backgroundColor: Color = Color.Unspecified
+    override var selected: Boolean = false
+    override var onSelectedChange: ((Boolean) -> Unit)? = null
     val cells = mutableListOf<@Composable TableCellScope.() -> Unit>()
 
     init {

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.unit.dp
 import com.seanproctor.datatable.CellContentProvider
 import com.seanproctor.datatable_material3.generated.resources.Res
@@ -57,5 +58,29 @@ object Material3CellContentProvider : CellContentProvider {
                 content()
             }
         }
+    }
+
+    @Composable
+    override fun SelectionCellContent(
+        selected: Boolean,
+        onSelectedChange: ((Boolean) -> Unit)?,
+    ) {
+        Checkbox(
+            checked = selected,
+            onCheckedChange = onSelectedChange,
+            enabled = onSelectedChange != null,
+        )
+    }
+
+    @Composable
+    override fun HeaderSelectionCellContent(
+        state: ToggleableState,
+        onClick: (() -> Unit)?,
+    ) {
+        TriStateCheckbox(
+            state = state,
+            onClick = onClick,
+            enabled = onClick != null,
+        )
     }
 }

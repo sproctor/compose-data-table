@@ -20,12 +20,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.state.ToggleableState
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.seanproctor.datatable.DataColumn
 import com.seanproctor.datatable.DataTableScope
 import com.seanproctor.datatable.DataTableState
-import com.seanproctor.datatable.TableColumnWidth
 import com.seanproctor.datatable.material3.DataTable
 import com.seanproctor.datatable.material3.PaginatedDataTable
 import com.seanproctor.datatable.paging.PageSize
@@ -58,16 +58,19 @@ fun App(onRowClick: (Int) -> Unit) {
             println("rowData: $rowData")
             var sortColumnIndex by remember { mutableStateOf<Int?>(null) }
             var sortAscending by remember { mutableStateOf(true) }
+            var selection by remember { mutableStateOf(emptySet<DemoData>()) }
+            val toggleSelection: (DemoData, Boolean) -> Unit = { data, isSelected ->
+                selection = if (isSelected) selection + data else selection - data
+            }
 
             val sortedData = when (sortColumnIndex) {
                 null -> rowData
-                1 -> if (sortAscending) rowData.sortedBy { it.text } else rowData.sortedByDescending { it.text }
-                2 -> if (sortAscending) rowData.sortedBy { it.value } else rowData.sortedByDescending { it.value }
+                0 -> if (sortAscending) rowData.sortedBy { it.text } else rowData.sortedByDescending { it.text }
+                1 -> if (sortAscending) rowData.sortedBy { it.value } else rowData.sortedByDescending { it.value }
                 else -> throw IllegalStateException("Invalid column index")
             }
 
             val columns = listOf(
-                DataColumn(width = TableColumnWidth.Wrap) { },
                 DataColumn(
                     //width = TableColumnWidth.Wrap,
                     onSort = { index, ascending ->
@@ -100,12 +103,14 @@ fun App(onRowClick: (Int) -> Unit) {
                             state = scrollState,
                             sortColumnIndex = sortColumnIndex,
                             sortAscending = sortAscending,
+                            selectable = true,
+                            onSelectAllChange = { selection = if (it) sortedData.toSet() else emptySet() },
                             modifier = Modifier.fillMaxSize().padding(16.dp),
                             footer = {
                                 Box {
                                     Text(
                                         modifier = Modifier.align(Alignment.CenterEnd),
-                                        text = "Footer",
+                                        text = "${selection.size} selected",
                                         maxLines = 1,
                                         overflow = TextOverflow.Ellipsis,
                                         style = MaterialTheme.typography.titleLarge
@@ -117,7 +122,8 @@ fun App(onRowClick: (Int) -> Unit) {
                                 colorEven = colorEven,
                                 colorOdd = colorOdd,
                                 data = sortedData,
-                                onRowClick = onRowClick,
+                                selection = selection,
+                                toggleSelection = toggleSelection,
                             )
                         }
                         VerticalScrollbar(
@@ -138,6 +144,14 @@ fun App(onRowClick: (Int) -> Unit) {
                         state = rememberPaginatedDataTableState(count = sortedData.size, pageSize = PageSize.FitHeight),
                         sortColumnIndex = sortColumnIndex,
                         sortAscending = sortAscending,
+                        selectable = true,
+                        // Selection spans pages, so the header reflects the whole data set.
+                        selectAllState = when (selection.size) {
+                            0 -> ToggleableState.Off
+                            sortedData.size -> ToggleableState.On
+                            else -> ToggleableState.Indeterminate
+                        },
+                        onSelectAllChange = { selection = if (it) sortedData.toSet() else emptySet() },
                         modifier = Modifier.fillMaxSize().padding(16.dp),
                         logger = { println(it) }
                     ) { fromIndex, toIndex ->
@@ -146,7 +160,8 @@ fun App(onRowClick: (Int) -> Unit) {
                             row {
                                 onClick = { onRowClick(fromIndex + index) }
                                 backgroundColor = if (index % 2 == 0) colorEven else colorOdd
-                                cell { }
+                                selected = rowData in selection
+                                onSelectedChange = { toggleSelection(rowData, it) }
                                 cell {
                                     Text(rowData.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                 }
@@ -166,13 +181,15 @@ private fun DataTableScope.generateTable(
     colorEven: Color,
     colorOdd: Color,
     data: List<DemoData>,
-    onRowClick: (Int) -> Unit,
+    selection: Set<DemoData>,
+    toggleSelection: (DemoData, Boolean) -> Unit,
 ) {
     data.forEachIndexed { index, rowData ->
         row {
             backgroundColor = if (index % 2 == 0) colorEven else colorOdd
-            onClick = { onRowClick(index) }
-            cell { }
+            // No onClick, so clicking the row toggles its selection.
+            selected = rowData in selection
+            onSelectedChange = { toggleSelection(rowData, it) }
             cell {
                 Text(rowData.text, maxLines = 1, overflow = TextOverflow.Ellipsis)
             }
